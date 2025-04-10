@@ -1,12 +1,28 @@
 import { AUTH_CONSTANTS } from "@/config/constants";
+import { authClient } from "@/lib/client";
 import { SignInInput } from "@/schema/sign-in.schema";
+
+interface BetterAuthUser {
+  id: string;
+  email: string;
+  name: string;
+  image?: string | null;
+  emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type UserRole = "USER" | "ADMIN" | "TEACHER" | "SUPERVISOR" | "DELEGATE";
 
 export interface AuthResponse {
   user: {
     id: string;
     email: string;
-    role: "admin" | "professor";
     name: string;
+    phone: string;
+    role: UserRole;
+    createdAt: string;
+    updatedAt?: string;
   };
   token: string;
 }
@@ -20,63 +36,123 @@ export class AuthenticationError extends Error {
 
 export class AuthService {
   static async signIn(credentials: SignInInput): Promise<AuthResponse> {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    const { ADMIN, PROFESSOR } = AUTH_CONSTANTS.DEMO_CREDENTIALS;
-
-    if (credentials.email === ADMIN.email && credentials.password === ADMIN.password) {
+    try {
+      const { data, error } = await authClient.signIn.email({
+        email: credentials.email,
+        password: credentials.password,
+      });
+      
+      if (error) {
+        throw new AuthenticationError(error.message);
+      }
+      
+      const role = this.determineUserRole(data.user.email);
+      
       return {
         user: {
-          id: "admin-1",
-          email: ADMIN.email,
-          role: "admin",
-          name: "Administrateur",
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.name,
+          phone: "Non spécifié",
+          role,
+          createdAt: data.user.createdAt.toISOString(),
+          updatedAt: data.user.updatedAt?.toISOString(),
         },
-        token: "simulated-jwt-token-admin-12345",
+        token: data.token,
       };
+      
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw new AuthenticationError("Identifiants invalides ou erreur du serveur.");
     }
-
-    if (credentials.email === PROFESSOR.email && credentials.password === PROFESSOR.password) {
-      return {
-        user: {
-          id: "prof-1",
-          email: PROFESSOR.email,
-          role: "professor",
-          name: "Professeur Dupont",
-        },
-        token: "simulated-jwt-token-professor-12345",
-      };
-    }
-
-    throw new AuthenticationError();
   }
 
   static async signOut(): Promise<{ success: boolean }> {
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return { success: true };
+    try {
+      const { error } = await authClient.signOut({});
+      
+      if (error) {
+        throw new Error(error.message);
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error("Logout failed:", error);
+      return { success: false };
+    }
   }
 
-  static async getCurrentUser(token: string): Promise<AuthResponse["user"] | null> {
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    if (!token) return null;
-
-    if (token.includes("admin")) {
+  static async getCurrentUser(): Promise<AuthResponse["user"] | null> {
+    try {
+      const { data, error } = await authClient.getSession();
+      
+      if (error || !data || !data.user) {
+        return null;
+      }
+      
+      const role = this.determineUserRole(data.user.email);
+      
       return {
-        id: "admin-1",
-        email: AUTH_CONSTANTS.DEMO_CREDENTIALS.ADMIN.email,
-        role: "admin",
-        name: "Administrateur",
+        id: data.user.id,
+        email: data.user.email,
+        name: data.user.name,
+        phone: "Non spécifié", 
+        role,
+        createdAt: data.user.createdAt.toISOString(),
+        updatedAt: data.user.updatedAt?.toISOString(),
       };
-    } else if (token.includes("professor")) {
-      return {
-        id: "prof-1",
-        email: AUTH_CONSTANTS.DEMO_CREDENTIALS.PROFESSOR.email,
-        role: "professor",
-        name: "Professeur Dupont",
-      };
+    } catch (error) {
+      console.error("Get current user failed:", error);
+      return null;
     }
-
-    return null;
+  }
+  
+  static async forgotPassword(email: string): Promise<{ success: boolean, error?: string }> {
+    try {
+      const { error } = await authClient.forgetPassword({
+        email
+      });
+      
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error("Forgot password failed:", error);
+      return { success: false, error: "Une erreur s'est produite lors de la demande de réinitialisation du mot de passe." };
+    }
+  }
+  
+  static async resetPassword(token: string, newPassword: string): Promise<{ success: boolean, error?: string }> {
+    try {
+      const { error } = await authClient.resetPassword({
+        token,
+        newPassword
+      });
+      
+      if (error) {
+        return { success: false, error: error.message };
+      }
+      
+      return { success: true };
+    } catch (error) {
+      console.error("Reset password failed:", error);
+      return { success: false, error: "Une erreur s'est produite lors de la réinitialisation du mot de passe." };
+    }
+  }
+    
+  private static determineUserRole(email: string): UserRole {
+    if (email === AUTH_CONSTANTS.DEMO_CREDENTIALS.ADMIN.email) {
+      return "ADMIN";
+    } else if (email.includes("professeur") || email.includes("teacher")) {
+      return "TEACHER";
+    } else if (email.includes("supervisor")) {
+      return "SUPERVISOR";
+    } else if (email.includes("delegate")) {
+      return "DELEGATE";
+    } else {
+      return "USER";
+    }
   }
 }
