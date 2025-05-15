@@ -17,5 +17,6 @@ export const routes = {
     courses: "/board/courses",
     programs: "/board/programs",
     universities: "/board/universities",
+    classSessions: "/board/class-sessions",
   },
 };

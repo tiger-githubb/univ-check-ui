@@ -4,6 +4,7 @@ import {
   PiBookOpenDuotone,
   PiBuildingDuotone,
   PiBuildingsDuotone,
+  PiCalendarCheckDuotone,
   PiCalendarDuotone,
   PiCheckSquareDuotone,
   PiGearDuotone,
@@ -82,9 +83,14 @@ export const mainSections: NavMenuGroup[] = [
         icon: PiBuildingDuotone,
       },
       {
-        title: "Cours", 
+        title: "Cours",
         url: routes.board.courses,
         icon: PiBookOpenDuotone,
+      },
+      {
+        title: "Sessions de cours",
+        url: routes.board.classSessions,
+        icon: PiCalendarCheckDuotone,
       },
       {
         title: "Utilisateurs",
@@ -95,7 +101,7 @@ export const mainSections: NavMenuGroup[] = [
         title: "Émargement",
         url: routes.board.attendance,
         icon: PiCheckSquareDuotone,
-        permission: ["TEACHER"], 
+        permission: ["TEACHER"],
       },
     ],
   },

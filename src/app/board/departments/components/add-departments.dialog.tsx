@@ -112,7 +112,7 @@ export default function AddDepartmentDialog({ onSuccess }: { onSuccess?: () => v
                       </SelectContent>
                     </Select>
                     <FormDescription className="text-xs">
-                      Sélectionnez l'université à laquelle appartient ce département.
+                      Sélectionnez l&apos;université à laquelle appartient ce département.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

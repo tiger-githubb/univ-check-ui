@@ -1,4 +1,5 @@
 import { AttendanceService } from "@/server/services/attendance.service";
+import { ClassSessionService } from "@/server/services/class-session.service";
 import {
   Attendance,
   ClassSession,
@@ -85,14 +86,14 @@ export function useUpdateAttendanceMutation() {
 export function useClassSessionsQuery(page = 1, limit = 10) {
   return useQuery<ClassSessionResponse>({
     queryKey: [...attendanceQueryKeys.classSessions, page, limit],
-    queryFn: () => AttendanceService.getClassSessions(page, limit),
+    queryFn: () => ClassSessionService.getClassSessions(page, limit),
   });
 }
 
 export function useClassSessionQuery(id: string) {
   return useQuery<ClassSession>({
     queryKey: attendanceQueryKeys.classSession(id),
-    queryFn: () => AttendanceService.getClassSessionById(id),
+    queryFn: () => ClassSessionService.getClassSessionById(id),
     enabled: !!id,
   });
 }
@@ -101,7 +102,7 @@ export function useCreateClassSessionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreateClassSessionInput) => AttendanceService.createClassSession(input),
+    mutationFn: (input: CreateClassSessionInput) => ClassSessionService.createClassSession(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSessions });
     },
@@ -112,7 +113,7 @@ export function useUpdateClassSessionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: UpdateClassSessionInput) => AttendanceService.updateClassSession(input),
+    mutationFn: (input: UpdateClassSessionInput) => ClassSessionService.updateClassSession(input),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSession(data.id) });
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSessions });
@@ -124,7 +125,7 @@ export function useDeleteClassSessionMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => AttendanceService.deleteClassSession(id),
+    mutationFn: (id: string) => ClassSessionService.deleteClassSession(id),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSessions });
     },
@@ -134,15 +135,15 @@ export function useDeleteClassSessionMutation() {
 export function useProfessorClassSessionsQuery(professorId: string, startDate?: string, endDate?: string) {
   return useQuery<ClassSession[]>({
     queryKey: [...attendanceQueryKeys.professorClassSessions(professorId), startDate, endDate],
-    queryFn: () => AttendanceService.getProfessorClassSessions(professorId, startDate, endDate),
+    queryFn: () => ClassSessionService.getProfessorClassSessions(professorId, startDate, endDate),
     enabled: !!professorId,
   });
 }
 
 // Nouveaux hooks pour les émargements
 export function useEmargementsQuery(
-  page = 1, 
-  limit = 10, 
+  page = 1,
+  limit = 10,
   filters?: {
     professorName?: string;
     courseTitle?: string;
@@ -223,7 +224,7 @@ export function useClassSessionsByWeekQuery(startDate: Date) {
 
   return useQuery<ClassSession[]>({
     queryKey: ["class-sessions", "week", userId, formattedDate],
-    queryFn: () => AttendanceService.getProfessorClassSessions(userId, formattedDate),
+    queryFn: () => ClassSessionService.getProfessorClassSessions(userId, formattedDate),
     enabled: !!(formattedDate && userId),
   });
 }

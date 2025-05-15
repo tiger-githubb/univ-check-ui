@@ -2,7 +2,7 @@ import React from "react";
 import { Department } from "@/types/departments.types";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import Pagination from "@/components/ui/pagination";
+import { Pagination } from "@/components/ui/pagination";
 import { RiEdit2Line, RiDeleteBinLine } from "@remixicon/react";
 
 interface DepartmentsTableProps {
@@ -51,21 +51,11 @@ const DepartmentsTable: React.FC<DepartmentsTableProps> = ({
               <TableCell>{department.university.name}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(department)}
-                    className="flex items-center gap-1"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => onEdit(department)} className="flex items-center gap-1">
                     <RiEdit2Line size={16} />
                     Modifier
                   </Button>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => onDelete(department.id)}
-                    className="flex items-center gap-1"
-                  >
+                  <Button variant="destructive" size="sm" onClick={() => onDelete(department.id)} className="flex items-center gap-1">
                     <RiDeleteBinLine size={16} />
                     Supprimer
                   </Button>

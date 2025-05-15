@@ -13,10 +13,10 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const userSchema = z.object({
-  id: z.string().nonempty("ID requis"), // Validation plus stricte
+  id: z.string().nonempty("ID requis"),
   name: z.string().min(1, "Nom requis"),
   email: z.string().email("Email invalide"),
-  phone: z.string().optional().nullable(), // Permettre null
+  phone: z.string().optional().nullable(),
   role: z.string().min(1, "Rôle requis"),
 });
 type UserFormInput = z.infer<typeof userSchema>;

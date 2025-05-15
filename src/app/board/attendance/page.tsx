@@ -105,7 +105,7 @@ export default function AttendancePage() {
                 <TabsList>
                   <TabsTrigger value="today" className="flex items-center gap-2">
                     <RiCheckboxLine size={18} />
-                    <span>Aujourd'hui</span>
+                    <span>Aujourd&apos;hui</span>
                   </TabsTrigger>
                   <TabsTrigger value="week" className="flex items-center gap-2">
                     <RiCalendar2Line size={18} />

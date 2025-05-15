@@ -1,24 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useOrganizationsQuery } from "@/hooks/queries/use-organizations.query";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { University } from "@/types/university.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
@@ -40,11 +25,7 @@ interface EditUniversityDialogProps {
   university: University | null;
 }
 
-export function EditUniversityDialog({
-  isOpen,
-  onOpenChange,
-  university,
-}: EditUniversityDialogProps) {
+export function EditUniversityDialog({ isOpen, onOpenChange, university }: EditUniversityDialogProps) {
   const { data: organizations } = useOrganizationsQuery();
   const { data: users } = useUsersQuery();
 
@@ -142,7 +123,7 @@ export function EditUniversityDialog({
                     </FormControl>
                     <SelectContent>
                       {users?.users?.map((user) => (
-                        <SelectItem key={user.id} value={user.id||""}>
+                        <SelectItem key={user.id} value={user.id || ""}>
                           {user.name}
                         </SelectItem>
                       ))}
