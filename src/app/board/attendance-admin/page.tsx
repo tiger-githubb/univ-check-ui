@@ -18,7 +18,6 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClassSessionsQuery, useEmargementsQuery } from "@/hooks/queries/use-attendance.query";
 import { useCurrentUser } from "@/hooks/queries/use-auth.query";
-import { ClassSessionResponse } from "@/types/attendance.types";
 import { RiAdminLine, RiFileListLine, RiScanLine, RiUserSearchLine } from "@remixicon/react";
 import { redirect } from "next/navigation";
 import { useState } from "react";
@@ -147,9 +146,9 @@ export default function AttendanceAdminPage() {
               </TabsContent>{" "}
               <TabsContent value="sessions" className="mt-0">
                 <SessionsList
-                  sessions={(sessionsData as ClassSessionResponse)?.classSessions || []}
+                  sessions={sessionsData || []}
                   isLoading={isSessionsLoading}
-                  totalItems={(sessionsData as ClassSessionResponse)?.total || 0}
+                  totalItems={sessionsData?.length || 0}
                   onRefresh={() => refetchSessions()}
                   currentPage={currentPage}
                   onPageChange={setCurrentPage}
