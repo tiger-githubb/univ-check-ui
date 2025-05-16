@@ -27,7 +27,7 @@ import { ClassSessionsTable } from "./components/class-sessions.table";
 
 export default function ClassSessionsPage() {
   const { data: user } = useCurrentUser();
-  const [activeTab, setActiveTab] = useState("calendar");
+  const [, setActiveTab] = useState("calendar");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
   // État de pagination
@@ -52,7 +52,7 @@ export default function ClassSessionsPage() {
   };
 
   // Calculer les données paginées
-  const classSessions = (data as any)?.classSessions || [];
+  const classSessions = Array.isArray(data) ? data : [];
   const totalItems = classSessions.length;
 
   return (

@@ -1,4 +1,10 @@
-import { ClassSession, Course, CreateClassSessionInput, UpdateClassSessionInput } from "@/types/attendance.types";
+import {
+  ClassSession,
+  ClassSessionResponse,
+  Course,
+  CreateClassSessionInput,
+  UpdateClassSessionInput,
+} from "@/types/attendance.types";
 import { getAuthToken } from "@/utils/auth-utils";
 import api from "@/utils/axios";
 
@@ -6,7 +12,7 @@ export class ClassSessionService {
   /**
    * Récupérer toutes les sessions de cours avec pagination
    */
-  static async getClassSessions(): Promise<ClassSession> {
+  static async getClassSessions(): Promise<ClassSessionResponse> {
     const token = getAuthToken();
     if (!token) {
       throw new Error("Vous devez être connecté pour accéder à cette ressource");

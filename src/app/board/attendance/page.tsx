@@ -30,7 +30,7 @@ export default function AttendancePage() {
   const isProfessor = user?.user?.role === "TEACHER";
 
   // État pour la semaine sélectionnée
-  const [selectedWeekStart, setSelectedWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [selectedWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
 
   // Formater la date pour la requête API
   const weekStartDateString = format(selectedWeekStart, "yyyy-MM-dd");

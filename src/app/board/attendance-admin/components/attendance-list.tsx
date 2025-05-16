@@ -10,7 +10,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Pagination } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useUpdateEmargementStatusMutation } from "@/hooks/queries/use-attendance.query";
@@ -199,35 +206,37 @@ export function AttendanceList({
         </div>
 
         <Pagination>
-          <Pagination.Content>
-            <Pagination.Item>
-              <Pagination.First
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationLink
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
                   onPageChange(1);
                 }}
                 isActive={currentPage === 1}
-              />
-            </Pagination.Item>
-            <Pagination.Item>
-              <Pagination.Previous
+                aria-label="Première page"
+              >
+                1
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationPrevious
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
                   if (currentPage > 1) onPageChange(currentPage - 1);
                 }}
-                isActive={currentPage === 1}
               />
-            </Pagination.Item>
+            </PaginationItem>
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNumber = currentPage <= 3 ? i + 1 : currentPage >= totalPages - 2 ? totalPages - 4 + i : currentPage - 2 + i;
 
               if (pageNumber <= 0 || pageNumber > totalPages) return null;
 
               return (
-                <Pagination.Item key={pageNumber}>
-                  <Pagination.Link
+                <PaginationItem key={pageNumber}>
+                  <PaginationLink
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
@@ -236,31 +245,33 @@ export function AttendanceList({
                     isActive={currentPage === pageNumber}
                   >
                     {pageNumber}
-                  </Pagination.Link>
-                </Pagination.Item>
+                  </PaginationLink>
+                </PaginationItem>
               );
             })}
-            <Pagination.Item>
-              <Pagination.Next
+            <PaginationItem>
+              <PaginationNext
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
                   if (currentPage < totalPages) onPageChange(currentPage + 1);
                 }}
-                isActive={currentPage === totalPages}
               />
-            </Pagination.Item>
-            <Pagination.Item>
-              <Pagination.Last
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink
                 href="#"
                 onClick={(e) => {
                   e.preventDefault();
                   onPageChange(totalPages);
                 }}
                 isActive={currentPage === totalPages}
-              />
-            </Pagination.Item>
-          </Pagination.Content>
+                aria-label="Dernière page"
+              >
+                {totalPages}
+              </PaginationLink>
+            </PaginationItem>
+          </PaginationContent>
         </Pagination>
       </div>
 

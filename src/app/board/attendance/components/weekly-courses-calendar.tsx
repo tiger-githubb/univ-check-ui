@@ -101,6 +101,7 @@ export function WeeklyCoursesCalendar({ courses, isLoading, onAttendanceSubmitte
         const courseDate = new Date(course.startTime);
         return isSameDay(courseDate, day);
       } catch (error) {
+        console.error("Erreur de comparaison de date:", error);
         return false;
       }
     });
@@ -112,6 +113,7 @@ export function WeeklyCoursesCalendar({ courses, isLoading, onAttendanceSubmitte
       const date = new Date(timeString);
       return format(date, "HH:mm", { locale: fr });
     } catch (error) {
+      console.error("Erreur de formatage de l'heure:", error);
       return timeString;
     }
   };

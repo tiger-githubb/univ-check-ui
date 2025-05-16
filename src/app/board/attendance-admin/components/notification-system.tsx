@@ -1,14 +1,14 @@
 "use client";
 
+import { FilterValues } from "@/app/board/attendance-admin/components/advanced-filter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { FilterValues } from "@/app/board/attendance-admin/components/advanced-filter";
-import { addMinutes, format, parseISO } from "date-fns";
+import { Emargement } from "@/types/attendance.types";
+import { RiBellLine } from "@remixicon/react";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useEffect, useState } from "react";
-import { RiBellLine } from "@remixicon/react";
 import { toast } from "sonner";
-import { Emargement } from "@/types/attendance.types";
 
 interface NotificationSystemProps {
   emargements: Emargement[];
@@ -17,7 +17,7 @@ interface NotificationSystemProps {
   filters?: FilterValues;
 }
 
-export function NotificationSystem({ emargements, onRefresh, refreshInterval = 60000, filters }: NotificationSystemProps) {
+export function NotificationSystem({ emargements, onRefresh, refreshInterval = 60000 }: NotificationSystemProps) {
   const [lastChecked, setLastChecked] = useState<Date>(new Date());
   const [newEmargements, setNewEmargements] = useState<number>(0);
   const [hasNotifications, setHasNotifications] = useState<boolean>(false);

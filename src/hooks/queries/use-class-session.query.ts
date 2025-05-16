@@ -1,5 +1,11 @@
 import { ClassSessionService } from "@/server/services/class-session.service";
-import { ClassSession, Course, CreateClassSessionInput, UpdateClassSessionInput } from "@/types/attendance.types";
+import {
+  ClassSession,
+  ClassSessionResponse,
+  Course,
+  CreateClassSessionInput,
+  UpdateClassSessionInput,
+} from "@/types/attendance.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const classSessionsQueryKeys = {
@@ -11,7 +17,7 @@ export const classSessionsQueryKeys = {
 };
 
 export function useClassSessionsQuery() {
-  return useQuery<ClassSession>({
+  return useQuery<ClassSessionResponse>({
     queryKey: [...classSessionsQueryKeys.classSessions],
     queryFn: () => ClassSessionService.getClassSessions(),
   });
@@ -70,9 +76,9 @@ export function useUpdateClassSessionMutation() {
       queryClient.invalidateQueries({ queryKey: classSessionsQueryKeys.classSessions });
 
       // Si la session appartient à un professeur, invalider aussi ses listes spécifiques
-      if (data.professor) {
-        queryClient.invalidateQueries({ queryKey: classSessionsQueryKeys.professorClassSessions(data.professorId) });
-        queryClient.invalidateQueries({ queryKey: classSessionsQueryKeys.professorTodayCourses(data.professorId) });
+      if (data.professor && data.professor.id) {
+        queryClient.invalidateQueries({ queryKey: classSessionsQueryKeys.professorClassSessions(data.professor.id) });
+        queryClient.invalidateQueries({ queryKey: classSessionsQueryKeys.professorTodayCourses(data.professor.id) });
       }
     },
   });

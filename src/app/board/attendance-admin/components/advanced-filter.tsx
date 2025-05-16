@@ -7,11 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { format, parseISO } from "date-fns";
+import { RiCalendarLine, RiFilterLine, RiSearch2Line, RiUserLine } from "@remixicon/react";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { X } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { RiCalendarLine, RiFilterLine, RiSearch2Line, RiUserLine } from "@remixicon/react";
 
 export interface FilterValues {
   professorName?: string;

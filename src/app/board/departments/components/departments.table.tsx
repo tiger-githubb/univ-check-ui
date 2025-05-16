@@ -1,9 +1,16 @@
-import React from "react";
-import { Department } from "@/types/departments.types";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Pagination } from "@/components/ui/pagination";
-import { RiEdit2Line, RiDeleteBinLine } from "@remixicon/react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Department } from "@/types/departments.types";
+import { RiDeleteBinLine, RiEdit2Line } from "@remixicon/react";
+import React from "react";
 
 interface DepartmentsTableProps {
   departments: Department[];
@@ -64,13 +71,39 @@ const DepartmentsTable: React.FC<DepartmentsTableProps> = ({
             </TableRow>
           ))}
         </TableBody>
-      </Table>
-      <Pagination
-        currentPage={page} // Remplacez `page` par `currentPage` pour correspondre à l'interface PaginationProps
-        totalItems={total}
-        itemsPerPage={limit}
-        onPageChange={onPageChange}
-      />
+      </Table>{" "}
+      <Pagination className="mt-4">
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => page > 1 && onPageChange(page - 1)}
+              className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            />
+          </PaginationItem>
+
+          {[...Array(Math.ceil(total / limit))].map((_, i) => {
+            const pageNumber = i + 1;
+            // Afficher la première page, la page courante, la dernière page, et une page avant et après la page courante
+            if (pageNumber === 1 || pageNumber === Math.ceil(total / limit) || (pageNumber >= page - 1 && pageNumber <= page + 1)) {
+              return (
+                <PaginationItem key={pageNumber}>
+                  <PaginationLink isActive={pageNumber === page} onClick={() => onPageChange(pageNumber)}>
+                    {pageNumber}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            }
+            return null;
+          })}
+
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => page < Math.ceil(total / limit) && onPageChange(page + 1)}
+              className={page >= Math.ceil(total / limit) ? "pointer-events-none opacity-50" : "cursor-pointer"}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
     </div>
   );
 };

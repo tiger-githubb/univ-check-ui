@@ -16,13 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useCurrentUser } from "@/hooks/queries/use-auth.query";
-import { RiBuilding2Line, RiScanLine } from "@remixicon/react";
-import { useState } from "react";
-import { EditUniversityDialog } from "./components/edit-university.dialog";
 import { useUniversitiesQuery } from "@/hooks/queries/use-universities.query";
 import { University } from "@/types/university.types";
-import { UniversitiesTable } from "./components/universities.table";
+import { RiBuilding2Line, RiScanLine } from "@remixicon/react";
+import { useState } from "react";
 import { AddUniversityDialog } from "./components/add-university.dialog";
+import { EditUniversityDialog } from "./components/edit-university.dialog";
+import { UniversitiesTable } from "./components/universities.table";
 
 export default function UniversitiesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -31,8 +31,7 @@ export default function UniversitiesPage() {
   const { data: user } = useCurrentUser();
   const { data: universities, isLoading, refetch } = useUniversitiesQuery();
 
-  // const isAdmin = user?.user?.role === "ADMIN";
-  const isAdmin = true;
+  const isAdmin = user?.user?.role === "ADMIN";
 
   return (
     <SidebarProvider>

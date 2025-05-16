@@ -1,4 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -40,15 +40,12 @@ export default function UserDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {" "}
         <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
           <Avatar className="size-8">
-            <AvatarImage
-              src={userInfo?.image || "https://res.cloudinary.com/dlzlfasou/image/upload/v1741345506/user_sam4wh.png"}
-              width={32}
-              height={32}
-              alt={userInfo?.name || "Profile image"}
-            />
-            <AvatarFallback>{userInfo?.name ? getInitials(userInfo.name) : "U"}</AvatarFallback>
+            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+              {userInfo?.name ? getInitials(userInfo.name) : "U"}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>

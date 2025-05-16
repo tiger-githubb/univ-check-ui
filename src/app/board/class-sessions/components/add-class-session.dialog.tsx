@@ -185,13 +185,15 @@ export const AddClassSessionDialog: React.FC<AddClassSessionDialogProps> = ({ is
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionnez un professeur" />
                       </SelectTrigger>
-                    </FormControl>
+                    </FormControl>{" "}
                     <SelectContent>
-                      {professors.map((professor) => (
-                        <SelectItem key={professor.id} value={professor.id}>
-                          {professor.name}
-                        </SelectItem>
-                      ))}
+                      {professors
+                        .filter((professor) => professor.id)
+                        .map((professor) => (
+                          <SelectItem key={professor.id} value={professor.id!}>
+                            {professor.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -210,13 +212,15 @@ export const AddClassSessionDialog: React.FC<AddClassSessionDialogProps> = ({ is
                       <SelectTrigger>
                         <SelectValue placeholder="Sélectionnez un délégué" />
                       </SelectTrigger>
-                    </FormControl>
+                    </FormControl>{" "}
                     <SelectContent>
-                      {students.map((student) => (
-                        <SelectItem key={student.id} value={student.id}>
-                          {student.name}
-                        </SelectItem>
-                      ))}
+                      {students
+                        .filter((student) => student.id)
+                        .map((student) => (
+                          <SelectItem key={student.id} value={student.id!}>
+                            {student.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />

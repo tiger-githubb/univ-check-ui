@@ -3,7 +3,6 @@ import { ClassSessionService } from "@/server/services/class-session.service";
 import {
   Attendance,
   ClassSession,
-  ClassSessionResponse,
   Course,
   CreateAttendanceInput,
   CreateClassSessionInput,
@@ -13,6 +12,7 @@ import {
   UpdateClassSessionInput,
   UpdateEmargementInput,
 } from "@/types/attendance.types";
+import { User } from "@/types/user.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const attendanceQueryKeys = {
@@ -64,7 +64,7 @@ export function useCreateAttendanceMutation() {
 
   return useMutation({
     mutationFn: (input: CreateAttendanceInput) => AttendanceService.createAttendance(input),
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.attendances });
     },
   });
@@ -83,10 +83,13 @@ export function useUpdateAttendanceMutation() {
 }
 
 // Nouveaux hooks pour les sessions de cours
-export function useClassSessionsQuery(page = 1, limit = 10) {
-  return useQuery<ClassSessionResponse>({
-    queryKey: [...attendanceQueryKeys.classSessions, page, limit],
-    queryFn: () => ClassSessionService.getClassSessions(page, limit),
+export function useClassSessionsQuery() {
+  return useQuery<ClassSession[]>({
+    queryKey: [...attendanceQueryKeys.classSessions],
+    queryFn: async () => {
+      const response = await ClassSessionService.getClassSessions();
+      return response.classSessions || [];
+    },
   });
 }
 
@@ -126,7 +129,7 @@ export function useDeleteClassSessionMutation() {
 
   return useMutation({
     mutationFn: (id: string) => ClassSessionService.deleteClassSession(id),
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSessions });
     },
   });
@@ -219,7 +222,7 @@ export function useEmargementMutation() {
 export function useClassSessionsByWeekQuery(startDate: Date) {
   const queryClient = useQueryClient();
   const user = queryClient.getQueryData(["current-user"]) as User;
-  const userId = user?.user?.id || "";
+  const userId = user?.id || "";
   const formattedDate = startDate.toISOString().split("T")[0];
 
   return useQuery<ClassSession[]>({
