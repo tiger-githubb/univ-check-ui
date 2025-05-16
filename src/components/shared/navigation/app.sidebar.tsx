@@ -30,7 +30,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const isActive = (url: string) => {
     if (url === "#") return false;
-    return pathname === url || pathname.startsWith(`${url}/`);
+    return pathname === url;
   };
 
   // Fonction pour vérifier si l'utilisateur a la permission pour un élément de menu
