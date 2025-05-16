@@ -58,7 +58,9 @@ export function useSignOutMutation() {
 
 export function useCurrentUser() {
   const [user, setUser] = useState<AuthResponse | null>(null);
+  const queryClient = useQueryClient();
 
+  // This effect handles the localStorage-based authentication
   useEffect(() => {
     // Check if window is defined (we're in the browser)
     if (typeof window !== "undefined") {
@@ -67,7 +69,10 @@ export function useCurrentUser() {
         const stored = localStorage.getItem("auth-user");
         if (stored) {
           try {
-            setUser(JSON.parse(stored));
+            const parsedUser = JSON.parse(stored);
+            setUser(parsedUser);
+            // Also update the query cache to ensure consistency
+            queryClient.setQueryData(authQueryKeys.user, parsedUser);
           } catch {
             setUser(null);
           }
@@ -79,7 +84,24 @@ export function useCurrentUser() {
       window.addEventListener("storage", updateUser);
       return () => window.removeEventListener("storage", updateUser);
     }
-  }, []);
+  }, [queryClient]);
+  // This effect handles the cookie-based authentication
+  useEffect(() => {
+    // Always try to get user data on mount, regardless of user state
+    if (typeof window !== "undefined") {
+      import("@/utils/auth-utils").then((module) => {
+        module.getUserData().then((userData) => {
+          if (userData) {
+            setUser(userData);
+            // Update localStorage for backward compatibility
+            localStorage.setItem("auth-user", JSON.stringify(userData));
+            // Update query cache
+            queryClient.setQueryData(authQueryKeys.user, userData);
+          }
+        });
+      });
+    }
+  }, [queryClient]);
 
   return useQuery({
     queryKey: authQueryKeys.user,
@@ -87,14 +109,18 @@ export function useCurrentUser() {
       // During server-side rendering or build time, we won't execute this code
       // because React Query handles SSR properly
 
-      // Try to get from localStorage first (in-memory state)
+      // Try to get from in-memory state first
       if (user) return user;
 
-      // If not available in state, try to get from the getUserData function
-      // which checks cookies and makes API calls if necessary
+      // If not available in state, try to get from getUserData function
       try {
         const userData = await import("@/utils/auth-utils").then((module) => module.getUserData());
         if (userData) {
+          // Store the user data in state and localStorage for future use
+          setUser(userData);
+          if (typeof window !== "undefined") {
+            localStorage.setItem("auth-user", JSON.stringify(userData));
+          }
           return userData;
         }
       } catch (error) {
@@ -104,9 +130,9 @@ export function useCurrentUser() {
       return null;
     },
     enabled: true,
-    staleTime: 1000 * 60 * 60,
-    retry: false,
-    refetchOnWindowFocus: false,
-    refetchOnMount: false,
+    staleTime: 1000 * 60 * 60, // Cache for 1 hour
+    retry: 1,
+    refetchOnWindowFocus: true, // Refetch when window gets focus
+    refetchOnMount: true, // Important: refetch when component mounts
   });
 }

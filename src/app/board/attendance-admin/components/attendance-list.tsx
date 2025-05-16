@@ -27,6 +27,8 @@ import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { useState } from "react";
 import { toast } from "sonner";
+import { ExportToPdfButton } from "./export-to-pdf-button";
+import { PrintAttendance } from "./print-attendance";
 
 interface AttendanceListProps {
   emargements: Emargement[];
@@ -118,9 +120,11 @@ export function AttendanceList({
   }
 
   const totalPages = Math.ceil(totalItems / pageSize);
-
   return (
     <div className="space-y-4">
+      <div className="flex justify-end mb-2">
+        <ExportToPdfButton emargements={emargements} fileName="liste-emargements" title="Liste des émargements" />
+      </div>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -282,7 +286,6 @@ export function AttendanceList({
             <DialogTitle>Détails de l&apos;émargement</DialogTitle>
             <DialogDescription>Informations complètes sur l&apos;émargement du cours</DialogDescription>
           </DialogHeader>
-
           {selectedEmargement && (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
@@ -322,9 +325,8 @@ export function AttendanceList({
                 <p>{format(parseISO(selectedEmargement.updatedAt), "dd/MM/yyyy HH:mm", { locale: fr })}</p>
               </div>
             </div>
-          )}
-
-          <DialogFooter className="flex justify-between">
+          )}{" "}
+          <DialogFooter className="flex flex-wrap justify-between">
             <div className="flex gap-2">
               <Button
                 variant="destructive"
@@ -351,9 +353,12 @@ export function AttendanceList({
                 Marquer présent
               </Button>
             </div>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Fermer
-            </Button>
+            <div className="flex gap-2">
+              {selectedEmargement && <PrintAttendance emargement={selectedEmargement} />}
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Fermer
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

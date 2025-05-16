@@ -21,10 +21,17 @@ import { useCurrentUser } from "@/hooks/queries/use-auth.query";
 import { RiAdminLine, RiFileListLine, RiScanLine, RiUserSearchLine } from "@remixicon/react";
 import { redirect } from "next/navigation";
 import { useState } from "react";
+import { AdminHelpGuide } from "./components/admin-help-guide";
 import { AdvancedFilter } from "./components/advanced-filter";
+import { AttendanceAnalytics } from "./components/attendance-analytics";
 import { AttendanceList } from "./components/attendance-list";
+import { AttendanceStats } from "./components/attendance-stats";
+import { BatchOperations } from "./components/batch-operations";
+import { DepartmentAttendance } from "./components/department-attendance";
 import { NotificationSystem } from "./components/notification-system";
+import { ProfessorAttendanceReport } from "./components/professor-attendance-report";
 import { SessionsList } from "./components/sessions-list";
+import { SupervisorValidation } from "./components/supervisor-validation";
 
 export default function AttendanceAdminPage() {
   const { data: user } = useCurrentUser();
@@ -84,7 +91,7 @@ export default function AttendanceAdminPage() {
           </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 lg:gap-6 py-4 lg:py-6">
-          {/* Page intro */}
+          {/* Page intro */}{" "}
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
               <h1 className="text-2xl font-semibold flex items-center gap-2">
@@ -93,8 +100,8 @@ export default function AttendanceAdminPage() {
               </h1>
               <p className="text-sm text-muted-foreground">Suivez et gérez les présences des professeurs aux cours.</p>
             </div>
+            <AdminHelpGuide />
           </div>
-
           {isAdmin ? (
             <Tabs defaultValue="emargements" className="w-full" onValueChange={(value) => refetchCurrentTab(value)}>
               <div className="flex justify-between items-center mb-4">
@@ -124,15 +131,41 @@ export default function AttendanceAdminPage() {
                   refreshInterval={60000}
                   filters={filters}
                 />
+                {/* Ajout du composant de statistiques */}{" "}
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium mb-3">Récapitulatif de présence</h3>
+                  <AttendanceStats emargements={emargementsData?.emargements || []} isLoading={isEmargementsLoading} />
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  {/* Composant d'analyse des tendances */}
+                  <AttendanceAnalytics emargements={emargementsData?.emargements || []} isLoading={isEmargementsLoading} />
 
+                  {/* Composant d'analyse par département */}
+                  <DepartmentAttendance emargements={emargementsData?.emargements || []} isLoading={isEmargementsLoading} />
+                </div>
+                {/* Nouveaux composants pour la gestion des émargements */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  {/* Validation par les superviseurs */}
+                  <SupervisorValidation
+                    emargements={emargementsData?.emargements || []}
+                    isLoading={isEmargementsLoading}
+                    onRefresh={() => refetchEmargements()}
+                  />
+
+                  {/* Opérations par lot */}
+                  <BatchOperations
+                    emargements={emargementsData?.emargements || []}
+                    isLoading={isEmargementsLoading}
+                    onRefresh={() => refetchEmargements()}
+                  />
+                </div>
                 <AdvancedFilter
                   onFilterChange={(newFilters) => {
                     setFilters(newFilters);
                     setCurrentPage(1); // Réinitialiser la page lors d'un nouveau filtrage
                   }}
                   onRefresh={() => refetchEmargements()}
-                />
-
+                />{" "}
                 <AttendanceList
                   emargements={emargementsData?.emargements || []}
                   isLoading={isEmargementsLoading}
@@ -143,6 +176,10 @@ export default function AttendanceAdminPage() {
                   onPageSizeChange={setPageSize}
                   totalItems={emargementsData?.total || 0}
                 />
+                {/* Rapport de présence par professeur */}
+                <div className="mt-8">
+                  <ProfessorAttendanceReport emargements={emargementsData?.emargements || []} isLoading={isEmargementsLoading} />
+                </div>
               </TabsContent>{" "}
               <TabsContent value="sessions" className="mt-0">
                 <SessionsList

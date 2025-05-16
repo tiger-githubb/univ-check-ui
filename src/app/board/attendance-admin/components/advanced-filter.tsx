@@ -31,21 +31,25 @@ export function AdvancedFilter({ onFilterChange, onRefresh }: AdvancedFilterProp
     defaultValues: {
       professorName: "",
       courseTitle: "",
-      status: "",
+      status: "ALL",
     },
   });
 
   const handleSubmit = (values: FilterValues) => {
-    onFilterChange(values);
+    // If status is "ALL", remove it from the filter values to not filter by status
+    const filterValues = { ...values };
+    if (filterValues.status === "ALL") {
+      delete filterValues.status;
+    }
+    onFilterChange(filterValues);
   };
-
   const handleReset = () => {
     form.reset({
       professorName: "",
       courseTitle: "",
       dateFrom: undefined,
       dateTo: undefined,
-      status: "",
+      status: "ALL",
     });
     onFilterChange({});
     onRefresh();
@@ -168,9 +172,9 @@ export function AdvancedFilter({ onFilterChange, onRefresh }: AdvancedFilterProp
                     <SelectTrigger>
                       <SelectValue placeholder="Tous les statuts" />
                     </SelectTrigger>
-                  </FormControl>
+                  </FormControl>{" "}
                   <SelectContent>
-                    <SelectItem value="">Tous les statuts</SelectItem>
+                    <SelectItem value="ALL">Tous les statuts</SelectItem>
                     <SelectItem value="PRESENT">Présent</SelectItem>
                     <SelectItem value="ABSENT">Absent</SelectItem>
                     <SelectItem value="PENDING">En attente</SelectItem>

@@ -36,7 +36,22 @@ export function getAuthToken(): string | null {
  * @returns {Promise<AuthResponse | null>}
  */
 export async function getUserData(): Promise<AuthResponse | null> {
-  // Get the token
+  // First try to get from localStorage if we're in the browser
+  if (typeof window !== "undefined") {
+    try {
+      const localStorageData = localStorage.getItem("auth-user");
+      if (localStorageData) {
+        const parsedData = JSON.parse(localStorageData);
+        if (parsedData?.token && parsedData?.user) {
+          return parsedData;
+        }
+      }
+    } catch (e) {
+      console.error("Error reading from localStorage:", e);
+    }
+  }
+
+  // If not found in localStorage, try to get with token from cookie
   const token = getAuthToken();
   if (!token) return null;
 
@@ -45,10 +60,17 @@ export async function getUserData(): Promise<AuthResponse | null> {
     const userData = await AuthService.getCurrentUser(token);
     if (!userData) return null;
 
-    return {
+    const authResponse = {
       user: userData,
       token,
     };
+
+    // Store in localStorage for future use if we're in browser
+    if (typeof window !== "undefined") {
+      localStorage.setItem("auth-user", JSON.stringify(authResponse));
+    }
+
+    return authResponse;
   } catch (error) {
     console.error("Failed to get user data:", error);
     return null;

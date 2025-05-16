@@ -48,15 +48,21 @@ export class AuthService {
     // Si le backend ne gère pas la session côté serveur, il suffit de supprimer le token côté client
     return { success: true };
   }
-
   static async getCurrentUser(token: string): Promise<AuthResponse["user"] | null> {
     try {
-      if (!token) return null;
+      if (!token) {
+        console.log("No token provided for user authentication");
+        return null;
+      }
+      console.log("Fetching current user with token:", token.substring(0, 10) + "...");
       const response = await api.get("/api/v1/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const userData = response.data;
-      if (!userData || !userData.email) return null;
+      if (!userData || !userData.email) {
+        console.log("Invalid user data received:", userData);
+        return null;
+      }
       return {
         id: userData.id || "unknown-id",
         email: userData.email,

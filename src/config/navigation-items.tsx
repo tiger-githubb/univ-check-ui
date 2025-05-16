@@ -103,6 +103,12 @@ export const mainSections: NavMenuGroup[] = [
         icon: PiCheckSquareDuotone,
         permission: ["TEACHER"],
       },
+      {
+        title: "Gestion des émargements",
+        url: routes.board.attendanceAdmin,
+        icon: PiCheckSquareDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
+      },
     ],
   },
 ];
