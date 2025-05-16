@@ -40,7 +40,6 @@ export default function UserDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        {" "}
         <Button variant="ghost" className="h-auto p-0 hover:bg-transparent">
           <Avatar className="size-8">
             <AvatarFallback className="bg-primary/10 text-primary font-medium">

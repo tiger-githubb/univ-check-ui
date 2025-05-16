@@ -5,6 +5,9 @@
  * @param days Durée de validité en jours (si négatif, supprime le cookie)
  */
 export function setCookie(name: string, value: string, days?: number): void {
+  // Don't try to set cookies during SSR
+  if (typeof window === "undefined") return;
+
   let expires = "";
 
   if (days) {
@@ -22,6 +25,9 @@ export function setCookie(name: string, value: string, days?: number): void {
  * @returns La valeur du cookie ou null s'il n'existe pas
  */
 export function getCookie(name: string): string | null {
+  // Don't try to get cookies during SSR
+  if (typeof window === "undefined") return null;
+
   const nameEQ = `${name}=`;
   const ca = document.cookie.split(";");
 
