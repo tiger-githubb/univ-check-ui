@@ -9,6 +9,7 @@ import {
   PiGearDuotone,
   PiHouseDuotone,
   PiUserDuotone,
+  PiBellDuotone,
 } from "react-icons/pi";
 import { routes } from "./routes";
 
@@ -76,11 +77,15 @@ export const mainSections: NavMenuGroup[] = [
         title: "Programmes",
         url: routes.board.programs,
         icon: PiBookmarkDuotone,
-      },
-      {
+      },      {
         title: "Cours",  // Nouvel élément pour les cours
         url: routes.board.courses,
         icon: PiBookOpenDuotone,
+      },
+      {
+        title: "Notifications",
+        url: routes.board.notifications,
+        icon: PiBellDuotone,
       },
       {
         title: "Utilisateurs",
