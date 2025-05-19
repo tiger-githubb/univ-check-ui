@@ -2,7 +2,7 @@
 
 import { AppSidebar } from "@/components/shared/navigation/app.sidebar";
 import UserDropdown from "@/components/shared/navigation/user.dropdown";
-import FeedbackDialog from "@/components/shared/others/feedback.dialog";
+import NotificationsDropdown from "@/components/shared/others/notifications";
 import { ModeToggle } from "@/components/shared/theme/mode-toggle";
 import {
   Breadcrumb,
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useCurrentUser } from "@/hooks/queries/use-auth.query";
+import { notify } from "@/utils/notification";
 import { RiScanLine } from "@remixicon/react";
 import { RecentAttendances } from "./components/recent-attendances";
 import { StatsGrid } from "./components/stats-grid";
@@ -46,9 +47,9 @@ export default function Page() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-          </div>
+          </div>{" "}
           <div className="flex gap-3 ml-auto">
-            <FeedbackDialog />
+            <NotificationsDropdown />
             <ModeToggle />
             <UserDropdown />
           </div>
@@ -67,7 +68,19 @@ export default function Page() {
                   : "Voici un aperçu de vos cours et émargements. Suivez vos présences en temps réel !"}
               </p>
             </div>
-            <Button className="px-3">{user?.user?.role === "ADMIN" ? "Nouvel Émargement" : "Émarger un Cours"}</Button>
+            <Button
+              className="px-3"
+              onClick={() => {
+                const action = user?.user?.role === "ADMIN" ? "créé un nouvel émargement" : "émargé un cours";
+                notify({
+                  title: "Action réussie",
+                  message: `Vous avez ${action} avec succès !`,
+                  type: "success",
+                });
+              }}
+            >
+              {user?.user?.role === "ADMIN" ? "Nouvel Émargement" : "Émarger un Cours"}
+            </Button>
           </div>
           {/* Numbers */}{" "}
           <StatsGrid

@@ -22,7 +22,7 @@ export default function UserDropdown() {
 
   const handleSignOut = () => {
     signOut();
-    router.replace(routes.auth.signIn);
+    router.push(routes.auth.signIn);
   };
 
   const userInfo = user?.user;

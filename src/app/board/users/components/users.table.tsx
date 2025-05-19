@@ -10,6 +10,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,7 +34,6 @@ import { User } from "@/types/user.types";
 import {
   RiArrowDownSLine,
   RiArrowUpSLine,
-  RiCheckLine,
   RiCloseCircleLine,
   RiDeleteBinLine,
   RiErrorWarningLine,
@@ -56,6 +56,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useId, useMemo, useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 
 interface UsersTableProps {
   users: User[];
@@ -92,6 +93,16 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
   const inputRef = useRef<HTMLInputElement>(null);
   const totalPages = Math.ceil(total / limit);
 
+  // Get user initials for avatar fallback
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
   const columns = useMemo<ColumnDef<User>[]>(
     () => [
       {
@@ -117,20 +128,29 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
       {
         accessorKey: "name",
         header: "Nom",
-        cell: (info) => <div className="font-medium">{info.getValue() as string}</div>,
-        size: 180,
+        cell: ({ row }) => {
+          const name = row.getValue("name") as string;
+          // On s'assure que l'email existe dans les données de l'utilisateur
+          const email = row.original.email || "";
+          return (
+            <div className="flex items-center gap-3">
+              <Avatar>
+                <AvatarFallback className="bg-accent text-muted-foreground text-xs">{getInitials(name)}</AvatarFallback>
+              </Avatar>
+              <div className="flex flex-col">
+                <div className="font-medium">{name}</div>
+                <div className="text-xs text-muted-foreground">{email}</div>
+              </div>
+            </div>
+          );
+        },
+        size: 220,
         enableHiding: false,
-      },
-      {
-        accessorKey: "email",
-        header: "Email",
-        cell: (info) => <span className="text-muted-foreground">{info.getValue() as string}</span>,
-        size: 200,
       },
       {
         accessorKey: "phone",
         header: "Téléphone",
-        cell: (info) => <span className="text-muted-foreground">{info.getValue() as string}</span>,
+        cell: (info) => <span className="text-muted-foreground">{(info.getValue() as string) || "—"}</span>,
         size: 150,
       },
       {
@@ -141,10 +161,18 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
           return (
             <div className="flex items-center h-full">
               <Badge
-                variant="outline"
-                className={cn("gap-1 py-0.5 px-2 text-sm", role === "ADMIN" ? "text-primary-foreground" : "text-muted-foreground")}
+                variant={role === "ADMIN" ? "default" : "outline"}
+                className={cn(
+                  "gap-1.5 py-1 px-2.5 text-xs font-medium",
+                  role === "ADMIN"
+                    ? "bg-primary/80 hover:bg-primary text-primary-foreground"
+                    : role === "TEACHER"
+                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
+                    : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
+                )}
               >
-                {role === "ADMIN" && <RiCheckLine className="text-emerald-500" size={14} aria-hidden="true" />}
+                {role === "ADMIN"}
+                {role === "TEACHER"}
                 {role}
               </Badge>
             </div>
@@ -262,8 +290,12 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
           <tbody aria-hidden="true" className="table-row h-1"></tbody>
           <TableBody>
             <TableRow className="hover:bg-transparent [&:first-child>td:first-child]:rounded-tl-lg [&:first-child>td:last-child]:rounded-tr-lg [&:last-child>td:first-child]:rounded-bl-lg [&:last-child>td:last-child]:rounded-br-lg">
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                Chargement des utilisateurs...
+              {" "}
+              <TableCell colSpan={columns.length} className="h-24">
+                <div className="flex justify-center items-center gap-2">
+                  <div className="h-4 w-4 rounded-full animate-pulse bg-muted"></div>
+                  <div className="text-center">Chargement des utilisateurs...</div>
+                </div>
               </TableCell>
             </TableRow>
           </TableBody>
@@ -378,6 +410,7 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
               <div className="space-y-3">
                 <div className="text-xs font-medium uppercase text-muted-foreground/60">Rôle</div>
                 <div className="space-y-3">
+                  {" "}
                   {uniqueRoleValues.map((value, i) => (
                     <div key={value} className="flex items-center gap-2">
                       <Checkbox
@@ -386,7 +419,23 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
                         onCheckedChange={(checked: boolean) => handleRoleChange(checked, value)}
                       />
                       <Label htmlFor={`${id}-${i}`} className="flex grow justify-between gap-2 font-normal">
-                        {value} <span className="ms-2 text-xs text-muted-foreground">{roleCounts.get(value)}</span>
+                        {" "}
+                        <Badge
+                          variant={value === "ADMIN" ? "default" : "outline"}
+                          className={cn(
+                            "gap-1 py-0.5 px-1.5 text-xs font-medium",
+                            value === "ADMIN"
+                              ? "bg-primary/80 hover:bg-primary text-primary-foreground"
+                              : value === "TEACHER"
+                              ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
+                              : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
+                          )}
+                        >
+                          {value === "ADMIN"}
+                          {value === "TEACHER"}
+                          {value}
+                        </Badge>
+                        <span className="ms-2 text-xs text-muted-foreground">{roleCounts.get(value)}</span>
                       </Label>
                     </div>
                   ))}
@@ -521,6 +570,11 @@ function RowActions({
           onSuccess: () => {
             onDelete(user.id!);
             setShowDeleteDialog(false);
+            toast.success("Utilisateur supprimé avec succès !");
+          },
+          onError: (error) => {
+            toast.error("Erreur lors de la suppression de l'utilisateur");
+            console.error("Suppression d'utilisateur échouée:", error);
           },
         });
       });
