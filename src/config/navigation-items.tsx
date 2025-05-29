@@ -4,6 +4,7 @@ import {
   PiBookOpenDuotone,
   PiBuildingDuotone,
   PiBuildingsDuotone,
+  PiCalendarCheckDuotone,
   PiCalendarDuotone,
   PiCheckSquareDuotone,
   PiGearDuotone,
@@ -13,7 +14,6 @@ import {
 } from "react-icons/pi";
 import { routes } from "./routes";
 
-// Types definitions
 export interface TeamData {
   name: string;
   logo: string;
@@ -24,7 +24,7 @@ export interface NavMenuItem {
   url: string;
   icon?: IconType;
   isActive?: boolean;
-  permission?: string[]; // Ajout de la propriété permission pour gérer les autorisations
+  permission?: string[];
 }
 
 export interface NavMenuGroup {
@@ -77,15 +77,21 @@ export const mainSections: NavMenuGroup[] = [
         title: "Programmes",
         url: routes.board.programs,
         icon: PiBookmarkDuotone,
-      },      {
-        title: "Cours",  // Nouvel élément pour les cours
+      },
+      {
+        title: "Départements",
+        url: routes.board.departments,
+        icon: PiBuildingDuotone,
+      },
+      {
+        title: "Cours",
         url: routes.board.courses,
         icon: PiBookOpenDuotone,
       },
       {
-        title: "Notifications",
-        url: routes.board.notifications,
-        icon: PiBellDuotone,
+        title: "Sessions de cours",
+        url: routes.board.classSessions,
+        icon: PiCalendarCheckDuotone,
       },
       {
         title: "Utilisateurs",
@@ -96,7 +102,13 @@ export const mainSections: NavMenuGroup[] = [
         title: "Émargement",
         url: routes.board.attendance,
         icon: PiCheckSquareDuotone,
-        permission: ["TEACHER"], // Cette page est réservée aux professeurs
+        permission: ["TEACHER"],
+      },
+      {
+        title: "Gestion des émargements",
+        url: routes.board.attendanceAdmin,
+        icon: PiCheckSquareDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
       },
     ],
   },

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useUpdateOrganisationMutation } from "@/hooks/queries/use-organizations.query";
 import { Organization } from "@/types/organization.types";
@@ -98,4 +98,3 @@ export function EditOrganizationDialog({ isOpen, onOpenChange, organization }: E
     </Dialog>
   );
 }
-

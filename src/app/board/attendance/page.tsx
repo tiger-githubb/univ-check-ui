@@ -15,17 +15,48 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { useProfessorTodaysCoursesQuery } from "@/hooks/queries/use-attendance.query";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useProfessorTodaysCoursesQuery, useProfessorWeekCoursesQuery } from "@/hooks/queries/use-attendance.query";
 import { useCurrentUser } from "@/hooks/queries/use-auth.query";
-import { RiCheckboxLine, RiScanLine } from "@remixicon/react";
+import { RiCalendar2Line, RiCheckboxLine, RiScanLine } from "@remixicon/react";
+import { format, startOfWeek } from "date-fns";
+import { useState } from "react";
 import { TodaysCoursesList } from "./components/todays-courses-list";
+import { WeeklyCoursesCalendar } from "./components/weekly-courses-calendar";
 
 export default function AttendancePage() {
   const { data: user } = useCurrentUser();
   const userId = user?.user?.id;
   const isProfessor = user?.user?.role === "TEACHER";
 
-  const { data: todaysCourses, isLoading, refetch } = useProfessorTodaysCoursesQuery(userId || "");
+  // État pour la semaine sélectionnée
+  const [selectedWeekStart] = useState<Date>(startOfWeek(new Date(), { weekStartsOn: 1 }));
+
+  // Formater la date pour la requête API
+  const weekStartDateString = format(selectedWeekStart, "yyyy-MM-dd");
+
+  // Requête pour les cours du jour
+  const {
+    data: todaysCourses,
+    isLoading: isTodayLoading,
+    refetch: refetchTodaysCourses,
+  } = useProfessorTodaysCoursesQuery(userId || "");
+
+  // Requête pour les cours de la semaine
+  const {
+    data: weekCourses,
+    isLoading: isWeekLoading,
+    refetch: refetchWeekCourses,
+  } = useProfessorWeekCoursesQuery(userId || "", weekStartDateString);
+
+  // Rafraîchir les données selon l'onglet actif
+  const refetchCurrentTab = (activeTab: string) => {
+    if (activeTab === "today") {
+      refetchTodaysCourses();
+    } else {
+      refetchWeekCourses();
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -64,23 +95,55 @@ export default function AttendancePage() {
                 <RiCheckboxLine className="text-primary" />
                 Émargement des cours
               </h1>
-              <p className="text-sm text-muted-foreground">Émargez vos cours du jour pour confirmer votre présence.</p>
+              <p className="text-sm text-muted-foreground">Émargez vos cours pour confirmer votre présence.</p>
             </div>
-            <Button onClick={() => refetch()}>Actualiser</Button>
           </div>
 
-          {/* Courses List */}
-          <div className="flex-1 overflow-auto">
-            {isProfessor ? (
-              <TodaysCoursesList courses={todaysCourses || []} isLoading={isLoading} onAttendanceSubmitted={() => refetch()} />
-            ) : (
-              <div className="flex items-center justify-center h-64">
-                <p className="text-muted-foreground">
-                  Vous n&apos;êtes pas autorisé à accéder à cette page. Seuls les professeurs peuvent émarger.
-                </p>
+          {isProfessor ? (
+            <Tabs defaultValue="today" className="w-full" onValueChange={(value) => refetchCurrentTab(value)}>
+              <div className="flex justify-between items-center mb-4">
+                <TabsList>
+                  <TabsTrigger value="today" className="flex items-center gap-2">
+                    <RiCheckboxLine size={18} />
+                    <span>Aujourd&apos;hui</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="week" className="flex items-center gap-2">
+                    <RiCalendar2Line size={18} />
+                    <span>Calendrier</span>
+                  </TabsTrigger>
+                </TabsList>
+                <Button
+                  variant="outline"
+                  onClick={() => refetchCurrentTab(document.querySelector('[aria-selected="true"]')?.getAttribute("value") || "today")}
+                >
+                  Actualiser
+                </Button>
               </div>
-            )}
-          </div>
+
+              <TabsContent value="today" className="mt-0">
+                <TodaysCoursesList
+                  courses={todaysCourses || []}
+                  isLoading={isTodayLoading}
+                  onAttendanceSubmitted={() => refetchTodaysCourses()}
+                />
+              </TabsContent>
+
+              <TabsContent value="week" className="mt-0">
+                <WeeklyCoursesCalendar
+                  courses={weekCourses || []}
+                  isLoading={isWeekLoading}
+                  onAttendanceSubmitted={() => refetchWeekCourses()}
+                  weekStartDate={selectedWeekStart}
+                />
+              </TabsContent>
+            </Tabs>
+          ) : (
+            <div className="flex items-center justify-center h-64">
+              <p className="text-muted-foreground">
+                Vous n&apos;êtes pas autorisé à accéder à cette page. Seuls les professeurs peuvent émarger.
+              </p>
+            </div>
+          )}
         </div>
       </SidebarInset>
     </SidebarProvider>

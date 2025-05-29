@@ -12,26 +12,23 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { useCurrentUser } from "@/hooks/queries/use-auth.query";
-import { useUniversitiesQuery } from "@/hooks/queries/use-universities.query";
-import { University } from "@/types/university.types";
-import { RiBuilding2Line, RiScanLine } from "@remixicon/react";
+import { useDepartmentsQuery } from "@/hooks/queries/use-departments.query";
+import { Department } from "@/types/departments.types";
+import { RiBuildingLine } from "@remixicon/react";
 import { useState } from "react";
-import { AddUniversityDialog } from "./components/add-university.dialog";
-import { EditUniversityDialog } from "./components/edit-university.dialog";
-import { UniversitiesTable } from "./components/universities.table";
+import AddDepartmentDialog from "./components/add-departments.dialog";
+import { EditDepartmentDialog } from "./components/edit-departments.dialog";
+import DepartmentsTable from "./components/departments.table";
 
-export default function UniversitiesPage() {
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [editingUniversity, setEditingUniversity] = useState<University | null>(null);
-
-  const { data: user } = useCurrentUser();
-  const { data: universities, isLoading, refetch } = useUniversitiesQuery();
-
-  const isAdmin = user?.user?.role === "ADMIN";
+export default function DepartmentsPage() {
+  const [page, setPage] = useState(1);
+  const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
+  const { data, isLoading, refetch } = useDepartmentsQuery(page, 10);
+  const departments = data?.departments || [];
+  const total = data?.total || 0;
+  const limit = data?.limit || 10;
 
   return (
     <SidebarProvider>
@@ -45,13 +42,13 @@ export default function UniversitiesPage() {
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="/board">
-                    <RiScanLine size={22} aria-hidden="true" />
+                    <RiBuildingLine size={22} aria-hidden="true" />
                     <span className="sr-only">Dashboard</span>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>Universités</BreadcrumbPage>
+                  <BreadcrumbPage>Départements</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
@@ -67,35 +64,33 @@ export default function UniversitiesPage() {
           <div className="flex items-center justify-between gap-4">
             <div className="space-y-1">
               <h1 className="text-2xl font-semibold flex items-center gap-2">
-                <RiBuilding2Line className="text-primary" />
-                Universités
+                <RiBuildingLine className="text-primary" />
+                Départements
               </h1>
-              <p className="text-sm text-muted-foreground">Gérez les universités de votre institution.</p>
+              <p className="text-sm text-muted-foreground">Gérez les départements de votre institution.</p>
             </div>
-            {isAdmin && <Button onClick={() => setIsAddDialogOpen(true)}>Ajouter</Button>}
+            <AddDepartmentDialog onSuccess={refetch} />
           </div>
-
-          {/* Table */}
-          <div className="flex-1 overflow-auto">
-            <UniversitiesTable
-              universities={universities || []}
-              isLoading={isLoading}
-              isAdmin={isAdmin}
-              onEdit={(university) => setEditingUniversity(university)}
-              onDelete={() => refetch()}
-            />
-          </div>
+          <DepartmentsTable
+            departments={departments}
+            isLoading={isLoading}
+            page={page}
+            limit={limit}
+            total={total}
+            onPageChange={setPage}
+            onEdit={(department) => setEditingDepartment(department)}
+            onDelete={() => refetch()}
+          />
         </div>
       </SidebarInset>
-
-      {/* Add University Dialog */}
-      <AddUniversityDialog isOpen={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} onSuccess={() => refetch()} />
-
-      {/* Edit University Dialog */}
-      <EditUniversityDialog
-        isOpen={!!editingUniversity}
-        onOpenChange={(open) => !open && setEditingUniversity(null)}
-        university={editingUniversity}
+      <EditDepartmentDialog
+        department={editingDepartment}
+        open={!!editingDepartment}
+        onOpenChange={(open) => !open && setEditingDepartment(null)}
+        onSuccess={() => {
+          setEditingDepartment(null);
+          refetch();
+        }}
       />
     </SidebarProvider>
   );

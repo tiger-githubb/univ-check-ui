@@ -12,9 +12,12 @@ export const routes = {
     settings: "/board/settings",    academicYears: "/board/academic-years",
     organizations: "/board/organizations",
     attendance: "/board/attendance",
+    attendanceAdmin: "/board/attendance-admin",
+    departments: "/board/departments",
+    courses: "/board/courses",
     programs: "/board/programs",
     universities: "/board/universities",
-    courses: "/board/courses",
+    classSessions: "/board/class-sessions",
     notifications: "/board/notifications",
   },
 };

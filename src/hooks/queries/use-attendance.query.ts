@@ -1,5 +1,18 @@
 import { AttendanceService } from "@/server/services/attendance.service";
-import { Attendance, Course, CreateAttendanceInput, UpdateAttendanceInput } from "@/types/attendance.types";
+import { ClassSessionService } from "@/server/services/class-session.service";
+import {
+  Attendance,
+  ClassSession,
+  Course,
+  CreateAttendanceInput,
+  CreateClassSessionInput,
+  CreateEmargementInput,
+  Emargement,
+  UpdateAttendanceInput,
+  UpdateClassSessionInput,
+  UpdateEmargementInput,
+} from "@/types/attendance.types";
+import { User } from "@/types/user.types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const attendanceQueryKeys = {
@@ -7,6 +20,12 @@ export const attendanceQueryKeys = {
   attendance: (id: string) => ["attendance", id],
   professorAttendances: (professorId: string) => ["attendances", "professor", professorId],
   todaysCourses: (professorId: string) => ["courses", "professor", professorId, "today"],
+  weekCourses: (professorId: string, startDate: string) => ["courses", "professor", professorId, "week", startDate],
+  classSessions: ["class-sessions"],
+  classSession: (id: string) => ["class-sessions", id],
+  professorClassSessions: (professorId: string) => ["class-sessions", "professor", professorId],
+  emargements: ["emargements"],
+  emargement: (id: string) => ["emargements", id],
 };
 
 export function useAttendancesQuery(page = 1, limit = 10) {
@@ -45,7 +64,7 @@ export function useCreateAttendanceMutation() {
 
   return useMutation({
     mutationFn: (input: CreateAttendanceInput) => AttendanceService.createAttendance(input),
-    onSuccess: (_data, variables) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.attendances });
     },
   });
@@ -60,5 +79,155 @@ export function useUpdateAttendanceMutation() {
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.attendance(data.id) });
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.attendances });
     },
+  });
+}
+
+// Nouveaux hooks pour les sessions de cours
+export function useClassSessionsQuery() {
+  return useQuery<ClassSession[]>({
+    queryKey: [...attendanceQueryKeys.classSessions],
+    queryFn: async () => {
+      const response = await ClassSessionService.getClassSessions();
+      return response.classSessions || [];
+    },
+  });
+}
+
+export function useClassSessionQuery(id: string) {
+  return useQuery<ClassSession>({
+    queryKey: attendanceQueryKeys.classSession(id),
+    queryFn: () => ClassSessionService.getClassSessionById(id),
+    enabled: !!id,
+  });
+}
+
+export function useCreateClassSessionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateClassSessionInput) => ClassSessionService.createClassSession(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSessions });
+    },
+  });
+}
+
+export function useUpdateClassSessionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateClassSessionInput) => ClassSessionService.updateClassSession(input),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSession(data.id) });
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSessions });
+    },
+  });
+}
+
+export function useDeleteClassSessionMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => ClassSessionService.deleteClassSession(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.classSessions });
+    },
+  });
+}
+
+export function useProfessorClassSessionsQuery(professorId: string, startDate?: string, endDate?: string) {
+  return useQuery<ClassSession[]>({
+    queryKey: [...attendanceQueryKeys.professorClassSessions(professorId), startDate, endDate],
+    queryFn: () => ClassSessionService.getProfessorClassSessions(professorId, startDate, endDate),
+    enabled: !!professorId,
+  });
+}
+
+// Nouveaux hooks pour les émargements
+export function useEmargementsQuery(
+  page = 1,
+  limit = 10,
+  filters?: {
+    professorName?: string;
+    courseTitle?: string;
+    dateFrom?: Date | string;
+    dateTo?: Date | string;
+    status?: string;
+  }
+) {
+  return useQuery<{ emargements: Emargement[]; total: number }>({
+    queryKey: [...attendanceQueryKeys.emargements, page, limit, filters],
+    queryFn: () => AttendanceService.getEmargements(page, limit, filters),
+  });
+}
+
+export function useEmargementQuery(id: string) {
+  return useQuery<Emargement>({
+    queryKey: attendanceQueryKeys.emargement(id),
+    queryFn: () => AttendanceService.getEmargementById(id),
+    enabled: !!id,
+  });
+}
+
+export function useCreateEmargementMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateEmargementInput) => AttendanceService.createEmargement(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.emargements });
+    },
+  });
+}
+
+export function useUpdateEmargementMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: UpdateEmargementInput) => AttendanceService.updateEmargement(input),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.emargement(data.id) });
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.emargements });
+    },
+  });
+}
+
+export function useUpdateEmargementStatusMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) => AttendanceService.updateEmargementStatus(id, status),
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.emargement(variables.id) });
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.emargements });
+    },
+  });
+}
+
+// Hook pour récupérer les cours du professeur pour une semaine
+export function useProfessorWeekCoursesQuery(professorId: string, startDate: string) {
+  return useQuery<Course[]>({
+    queryKey: attendanceQueryKeys.weekCourses(professorId, startDate),
+    queryFn: () => AttendanceService.getProfessorWeekCourses(professorId, startDate),
+    enabled: !!(professorId && startDate),
+  });
+}
+
+// Hook alias pour l'émargement
+export function useEmargementMutation() {
+  return useCreateEmargementMutation();
+}
+
+// Hook pour récupérer les sessions de cours par semaine
+export function useClassSessionsByWeekQuery(startDate: Date) {
+  const queryClient = useQueryClient();
+  const user = queryClient.getQueryData(["current-user"]) as User;
+  const userId = user?.id || "";
+  const formattedDate = startDate.toISOString().split("T")[0];
+
+  return useQuery<ClassSession[]>({
+    queryKey: ["class-sessions", "week", userId, formattedDate],
+    queryFn: () => ClassSessionService.getProfessorClassSessions(userId, formattedDate),
+    enabled: !!(formattedDate && userId),
   });
 }

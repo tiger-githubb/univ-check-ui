@@ -13,11 +13,13 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 const userSchema = z.object({
-  id: z.string().nonempty("ID requis"), // Validation plus stricte
+  id: z.string().nonempty("ID requis"),
   name: z.string().min(1, "Nom requis"),
   email: z.string().email("Email invalide"),
-  phone: z.string().optional().nullable(), // Permettre null
-  role: z.string().min(1, "Rôle requis"),
+  phone: z.string().optional().nullable(),
+  role: z.enum(["USER", "ADMIN", "TEACHER", "SUPERVISOR", "DELEGATE"] as const, {
+    errorMap: () => ({ message: "Rôle requis" }),
+  }),
 });
 type UserFormInput = z.infer<typeof userSchema>;
 
@@ -56,7 +58,6 @@ export function EditUserDialog({
       });
     }
   }, [user, form]);
-
   function onSubmit(values: UserFormInput) {
     // Vérification supplémentaire
     if (!values.id) {
@@ -64,7 +65,14 @@ export function EditUserDialog({
       return;
     }
 
-    updateUser(values, {
+    // Convertir les valeurs pour être compatibles avec UserUpdateInput
+    // Garantir que phone est undefined et pas null
+    const userData = {
+      ...values,
+      phone: values.phone || undefined,
+    };
+
+    updateUser(userData, {
       onSuccess: () => {
         toast.success("Utilisateur mis à jour avec succès");
         onOpenChange(false);

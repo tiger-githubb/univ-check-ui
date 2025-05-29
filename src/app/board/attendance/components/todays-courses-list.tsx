@@ -65,6 +65,7 @@ export function TodaysCoursesList({ courses, isLoading, onAttendanceSubmitted }:
       const date = new Date(timeString);
       return format(date, "HH:mm", { locale: fr });
     } catch (error) {
+      console.error("Erreur de formatage de l'heure:", error);
       return timeString;
     }
   };
