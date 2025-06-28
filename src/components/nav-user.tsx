@@ -1,10 +1,11 @@
 import {
   RiExpandUpDownLine,
   RiUserLine,
-  RiGroupLine,
+  RiSettings3Line,
   RiSparklingLine,
   RiLogoutCircleLine,
 } from "@remixicon/react";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -53,21 +54,24 @@ export function NavUser({
             side="bottom"
             align="end"
             sideOffset={4}
-          >
-            <DropdownMenuGroup>
-              <DropdownMenuItem className="gap-3 focus:bg-sidebar-accent">
-                <RiUserLine
-                  size={20}
-                  className="size-5 text-muted-foreground/80"
-                />
-                Profile
+          >            <DropdownMenuGroup>
+              <DropdownMenuItem asChild className="gap-3 focus:bg-sidebar-accent">
+                <Link href="/board/profile">
+                  <RiUserLine
+                    size={20}
+                    className="size-5 text-muted-foreground/80"
+                  />
+                  Profile
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem className="gap-3 focus:bg-sidebar-accent">
-                <RiGroupLine
-                  size={20}
-                  className="size-5 text-muted-foreground/80"
-                />
-                Accounts
+              <DropdownMenuItem asChild className="gap-3 focus:bg-sidebar-accent">
+                <Link href="/board/settings">
+                  <RiSettings3Line
+                    size={20}
+                    className="size-5 text-muted-foreground/80"
+                  />
+                  Paramètres
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem className="gap-3 focus:bg-sidebar-accent">
                 <RiSparklingLine
