@@ -1,10 +1,13 @@
+import { CreateEmargementInput, Emargement, UpdateEmargementInput } from "@/types/attendance.types";
+import { CreateNotificationDto } from "@/types/notification.types";
 import { getAuthToken } from "@/utils/auth-utils";
 import api from "@/utils/axios";
-import { CreateEmargementInput, Emargement, UpdateEmargementInput } from "@/types/attendance.types";
+import { NotificationService } from "./notification.service";
 
-export class EmargementService {  static async getEmargements(
-    page = 1, 
-    limit = 10, 
+export class EmargementService {
+  static async getEmargements(
+    page = 1,
+    limit = 10,
     filters?: {
       professorName?: string;
       courseTitle?: string;
@@ -20,9 +23,9 @@ export class EmargementService {  static async getEmargements(
       }
 
       // Préparer les paramètres de requête
-      const params: Record<string, string | number> = { 
-        page, 
-        limit 
+      const params: Record<string, string | number> = {
+        page,
+        limit,
       };
 
       // Ajouter les filtres s'ils sont présents
@@ -34,14 +37,10 @@ export class EmargementService {  static async getEmargements(
           params.courseTitle = filters.courseTitle;
         }
         if (filters.dateFrom) {
-          params.dateFrom = typeof filters.dateFrom === 'string' 
-            ? filters.dateFrom 
-            : filters.dateFrom.toISOString().split('T')[0];
+          params.dateFrom = typeof filters.dateFrom === "string" ? filters.dateFrom : filters.dateFrom.toISOString().split("T")[0];
         }
         if (filters.dateTo) {
-          params.dateTo = typeof filters.dateTo === 'string' 
-            ? filters.dateTo 
-            : filters.dateTo.toISOString().split('T')[0];
+          params.dateTo = typeof filters.dateTo === "string" ? filters.dateTo : filters.dateTo.toISOString().split("T")[0];
         }
         if (filters.status) {
           params.status = filters.status;
@@ -84,7 +83,6 @@ export class EmargementService {  static async getEmargements(
       throw new Error("Impossible de récupérer les détails de l'émargement");
     }
   }
-
   static async createEmargement(input: CreateEmargementInput): Promise<Emargement> {
     try {
       const token = getAuthToken();
@@ -97,6 +95,45 @@ export class EmargementService {  static async getEmargements(
           Authorization: `Bearer ${token}`,
         },
       });
+
+      // Après création réussie, on tente de récupérer les infos nécessaires pour la notification
+      try {
+        const emargementDetails = await EmargementService.getEmargementById(data.id);
+
+        // Tenter de récupérer les administrateurs et le délégué pour les notifications
+        // Ces appels devraient être implémentés dans un service utilisateur approprié
+        const adminIds = await EmargementService.getAdminUserIds();
+        const delegateId = emargementDetails.classSession?.classRepresentative?.id;
+
+        // Envoi de notifications si on a récupéré les ID
+        if (adminIds && adminIds.length > 0) {
+          for (const adminId of adminIds) {
+            await EmargementService.sendNotification({
+              recipientId: adminId,
+              emargementId: data.id,
+              message: `Le professeur ${emargementDetails.professor?.name || "Inconnu"} a émargé pour le cours ${
+                emargementDetails.classSession?.course?.title || "Sans titre"
+              }`,
+              status: "SENT",
+            });
+          }
+        }
+
+        // Notification au délégué si disponible
+        if (delegateId) {
+          await EmargementService.sendNotification({
+            recipientId: delegateId,
+            emargementId: data.id,
+            message: `Le professeur ${emargementDetails.professor?.name || "Inconnu"} a émargé pour le cours ${
+              emargementDetails.classSession?.course?.title || "Sans titre"
+            }`,
+            status: "SENT",
+          });
+        }
+      } catch (notifError) {
+        // On ne fait pas échouer l'émargement si les notifications échouent
+        console.error("Erreur lors de l'envoi des notifications:", notifError);
+      }
 
       return data;
     } catch (error) {
@@ -165,7 +202,7 @@ export class EmargementService {  static async getEmargements(
       throw new Error("Impossible de supprimer l'émargement");
     }
   }
-  
+
   static async getEmargementsByClassSession(classSessionId: string): Promise<Emargement[]> {
     try {
       const token = getAuthToken();
@@ -185,7 +222,42 @@ export class EmargementService {  static async getEmargements(
       throw new Error("Impossible de récupérer les émargements pour cette session");
     }
   }
-  
+
+  /**
+   * Envoie une notification liée à un émargement
+   */
+  static async sendNotification(notificationData: CreateNotificationDto): Promise<boolean> {
+    try {
+      return !!(await NotificationService.createNotification(notificationData));
+    } catch (error) {
+      console.error("Erreur lors de l'envoi de la notification:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Récupère les IDs de tous les utilisateurs avec rôle ADMIN
+   */
+  static async getAdminUserIds(): Promise<string[]> {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        throw new Error("Vous devez être connecté pour accéder à cette ressource");
+      }
+
+      const { data } = await api.get(`/api/v1/users?role=ADMIN`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }); // Supposons que l'API retourne une liste d'utilisateurs
+      // On extrait les IDs
+      return (data.items || data).map((user: { id: string }) => user.id);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des admins:", error);
+      return [];
+    }
+  }
+
   static async getEmargementsByProfessor(professorId: string): Promise<Emargement[]> {
     try {
       const token = getAuthToken();

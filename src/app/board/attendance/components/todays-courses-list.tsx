@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateAttendanceMutation } from "@/hooks/queries/use-attendance.query";
+import { useEmargementMutation } from "@/hooks/queries/use-attendance.query";
+import { useCurrentUser } from "@/hooks/queries/use-auth.query";
 import { Course } from "@/types/attendance.types";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -19,12 +20,20 @@ interface TodaysCoursesListProps {
 export function TodaysCoursesList({ courses, isLoading, onAttendanceSubmitted }: TodaysCoursesListProps) {
   const [comments, setComments] = useState<Record<string, string>>({});
 
-  const { mutate: createAttendance, isPending } = useCreateAttendanceMutation();
+  const { mutate: createAttendance, isPending } = useEmargementMutation();
+  const { data: user } = useCurrentUser();
+  const userId = user?.user?.id;
 
   const handleSubmitAttendance = (courseId: string) => {
+    if (!userId) {
+      toast.error("Vous devez être connecté pour émarger");
+      return;
+    }
+
     createAttendance(
       {
-        courseId,
+        classSessionId: courseId,
+        professorId: userId,
         status: "PRESENT",
         comments: comments[courseId] || "",
       },

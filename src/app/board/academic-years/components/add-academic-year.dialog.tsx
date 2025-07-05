@@ -22,7 +22,7 @@ interface AddAcademicYearDialogProps {
   onSuccess?: () => void;
 }
 
-export function AddAcademicYearDialog({ isOpen, onOpenChange, onSuccess }: AddAcademicYearDialogProps) {
+export function AddAcademicYearDialog({ isOpen, onOpenChange, onSuccess }: Readonly<AddAcademicYearDialogProps>) {
   const { mutate: createAcademicYear, isPending } = useCreateAcademicYearMutation();
 
   const form = useForm<FormValues>({

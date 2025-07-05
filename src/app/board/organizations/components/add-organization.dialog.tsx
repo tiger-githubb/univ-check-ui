@@ -22,7 +22,7 @@ interface AddOrganizationDialogProps {
   onSuccess?: () => void;
 }
 
-export function AddOrganizationDialog({ isOpen, onOpenChange, onSuccess }: AddOrganizationDialogProps) {
+export function AddOrganizationDialog({ isOpen, onOpenChange, onSuccess }: Readonly<AddOrganizationDialogProps>) {
   const { mutate: createOrganization, isPending } = useCreateOrganisationMutation();
 
   const form = useForm<FormValues>({

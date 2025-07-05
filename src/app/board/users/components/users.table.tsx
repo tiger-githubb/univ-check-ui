@@ -36,6 +36,7 @@ import {
   RiArrowUpSLine,
   RiCloseCircleLine,
   RiDeleteBinLine,
+  RiEdit2Line,
   RiErrorWarningLine,
   RiFilter3Line,
   RiMoreLine,
@@ -75,7 +76,7 @@ const roleFilterFn: FilterFn<User> = (row, columnId, filterValue: string[]) => {
   return filterValue.includes(role);
 };
 
-export default function UsersTable({ users, isLoading, page, limit, total, onPageChange, onEdit }: UsersTableProps) {
+export default function UsersTable({ users, isLoading, page, limit, total, onPageChange, onEdit }: Readonly<UsersTableProps>) {
   const id = useId();
   const { mutate: deleteUser } = useDeleteUserMutation();
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -167,8 +168,8 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
                   role === "ADMIN"
                     ? "bg-primary/80 hover:bg-primary text-primary-foreground"
                     : role === "TEACHER"
-                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
-                    : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
+                      ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
+                      : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
                 )}
               >
                 {role === "ADMIN"}
@@ -282,7 +283,7 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
                   style={{ width: `${column.size}px` }}
                   className="relative h-9 select-none bg-sidebar border-y border-border first:border-l first:rounded-l-lg last:border-r last:rounded-r-lg"
                 >
-                  {typeof column.header === "string" ? column.header : column.id || ""}
+                  {typeof column.header === "string" ? column.header : column.id ?? ""}
                 </TableHead>
               ))}
             </TableRow>
@@ -427,8 +428,8 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
                             value === "ADMIN"
                               ? "bg-primary/80 hover:bg-primary text-primary-foreground"
                               : value === "TEACHER"
-                              ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
-                              : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
+                                ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
+                                : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
                           )}
                         >
                           {value === "ADMIN"}
@@ -582,48 +583,40 @@ function RowActions({
   };
 
   return (
-    <>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <div className="flex justify-end">
-            <Button size="icon" variant="ghost" className="shadow-none text-muted-foreground/60" aria-label="Modifier l'utilisateur">
-              <RiMoreLine className="size-5" size={20} aria-hidden="true" />
-            </Button>
-          </div>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-auto">
-          <DropdownMenuGroup>
-            <DropdownMenuItem onClick={() => onEdit(user)} disabled={isUpdatePending}>
-              Modifier l&apos;utilisateur
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowDeleteDialog(true)}
-            variant="destructive"
-            className="dark:data-[variant=destructive]:focus:bg-destructive/10"
-          >
-            Supprimer
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
 
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+    <div className="flex justify-end gap-2">
+      <Button size="sm" variant="ghost" onClick={() => onEdit(user)}>
+        <RiEdit2Line className="h-4 w-4" />
+        <span className="sr-only">Modifier</span>
+      </Button>
+
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button size="sm" variant="ghost" className="text-destructive" disabled={isDeleting || isUpdatePending}>
+            <RiDeleteBinLine className="h-4 w-4" />
+            <span className="sr-only">Supprimer</span>
+          </Button>
+        </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+            <AlertDialogTitle>Êtes-vous sûr?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est irréversible. Cela va supprimer définitivement cet utilisateur.
+              Cette action ne peut pas être annulée. Cela supprimera définitivement l&apos;useranisation{" "}
+              {user.name}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting || isUpdatePending}>Annuler</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} disabled={isDeleting || isUpdatePending}>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete} disabled={isDeleting || isUpdatePending}
+              className="bg-destructive text-white hover:bg-destructive/90"
+            >
               Supprimer
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
+
   );
 }

@@ -1,17 +1,19 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { CalendarProvider } from "@/components/calendar-context";
+import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "@/providers/theme-provider";
+import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import { Toaster } from "@/components/ui/sonner";
-import ReactQueryProvider from "@/utils/providers/ReactQueryProvider";
-import { ThemeProvider } from "@/utils/providers/theme-provider";
+const fontSans = Geist({
+  variable: "--font-sans",
+  subsets: ["latin"],
+});
 
-const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Univ-Check - Gestion des présences",
-  description: "Système de gestion des présences pour universités",
-};
+const fontMono = Geist_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+});
 
 export default function RootLayout({
   children,
@@ -20,13 +22,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="fr" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <ReactQueryProvider>
-            {children}
+      <body className={`${fontSans.variable} ${fontMono.variable} bg-sidebar font-sans antialiased`}>
+        <ReactQueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <CalendarProvider>{children}</CalendarProvider>
             <Toaster />
-          </ReactQueryProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );

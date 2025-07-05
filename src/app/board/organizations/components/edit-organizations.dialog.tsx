@@ -24,7 +24,7 @@ interface EditOrganizationDialogProps {
   organization: Organization | null;
 }
 
-export function EditOrganizationDialog({ isOpen, onOpenChange, organization }: EditOrganizationDialogProps) {
+export function EditOrganizationDialog({ isOpen, onOpenChange, organization }: Readonly<EditOrganizationDialogProps>) {
   const { mutate: updateOrganization, isSuccess, isPending } = useUpdateOrganisationMutation();
 
   const form = useForm<FormValues>({

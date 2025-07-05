@@ -4,7 +4,6 @@ import {
   Attendance,
   ClassSession,
   Course,
-  CreateAttendanceInput,
   CreateClassSessionInput,
   CreateEmargementInput,
   Emargement,
@@ -63,9 +62,36 @@ export function useCreateAttendanceMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreateAttendanceInput) => AttendanceService.createAttendance(input),
-    onSuccess: () => {
+    mutationFn: (input: CreateEmargementInput) => AttendanceService.createEmargement(input),
+    onSuccess: (_data, variables) => {
+      // Récupère l'ID du professeur à partir des variables d'entrée
+      const professorId = variables.professorId;
+
       queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.attendances });
+      queryClient.invalidateQueries({ queryKey: attendanceQueryKeys.emargements });
+
+      // Invalide le cache des cours d'aujourd'hui seulement si l'ID du professeur est disponible
+      if (professorId) {
+        queryClient.invalidateQueries({
+          queryKey: attendanceQueryKeys.todaysCourses(professorId),
+        });
+
+        // Invalide également le cache des cours de la semaine si nécessaire
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey;
+            return Array.isArray(queryKey) && queryKey[0] === "courses" && queryKey[1] === "professor" && queryKey[2] === professorId;
+          },
+        });
+      } else {
+        // Invalider toutes les requêtes qui concernent les cours si l'ID n'est pas disponible
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey;
+            return Array.isArray(queryKey) && queryKey[0] === "courses";
+          },
+        });
+      }
     },
   });
 }

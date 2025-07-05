@@ -29,9 +29,9 @@ interface EditCourseDialogProps {
   onSuccess?: () => void;
 }
 
-export function EditCourseDialog({ isOpen, onOpenChange, course, onSuccess }: EditCourseDialogProps) {
+export function EditCourseDialog({ isOpen, onOpenChange, course, onSuccess }: Readonly<EditCourseDialogProps>) {
   const { mutate: updateCourse, isPending } = useUpdateCourseMutation();
-  const { data: programs = [] } = useProgramsQuery();
+  const { data: programs } = useProgramsQuery();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(courseSchema),
@@ -130,7 +130,7 @@ export function EditCourseDialog({ isOpen, onOpenChange, course, onSuccess }: Ed
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {programs.map((program) => (
+                      {programs?.map((program) => (
                         <SelectItem key={program.id} value={program.id}>
                           {program.name}
                         </SelectItem>

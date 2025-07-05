@@ -28,12 +28,12 @@ export function EditUserDialog({
   open,
   onOpenChange,
   onSuccess,
-}: {
+}: Readonly<{
   user: User | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-}) {
+}>) {
   const form = useForm<UserFormInput>({
     resolver: zodResolver(userSchema),
     defaultValues: {

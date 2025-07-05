@@ -1,6 +1,9 @@
 "use client";
 
+import { CalendarProvider } from "@/components/calendar-context";
+import AttendanceCalendar from "@/components/calendar/attendance-calendar";
 import { AppSidebar } from "@/components/shared/navigation/app.sidebar";
+import { NotificationDropdown } from "@/components/shared/navigation/notification.dropdown";
 import UserDropdown from "@/components/shared/navigation/user.dropdown";
 import FeedbackDialog from "@/components/shared/others/feedback.dialog";
 import { ModeToggle } from "@/components/shared/theme/mode-toggle";
@@ -20,12 +23,13 @@ import { useProfessorTodaysCoursesQuery, useProfessorWeekCoursesQuery } from "@/
 import { useCurrentUser } from "@/hooks/queries/use-auth.query";
 import { RiCalendar2Line, RiCheckboxLine, RiScanLine } from "@remixicon/react";
 import { format, startOfWeek } from "date-fns";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TodaysCoursesList } from "./components/todays-courses-list";
-import { WeeklyCoursesCalendar } from "./components/weekly-courses-calendar";
+import { useBreadcrumb } from "@/contexts/breadcrumb.context";
 
 export default function AttendancePage() {
   const { data: user } = useCurrentUser();
+  const { setPageTitle } = useBreadcrumb();
   const userId = user?.user?.id;
   const isProfessor = user?.user?.role === "TEACHER";
 
@@ -34,7 +38,6 @@ export default function AttendancePage() {
 
   // Formater la date pour la requête API
   const weekStartDateString = format(selectedWeekStart, "yyyy-MM-dd");
-
   // Requête pour les cours du jour
   const {
     data: todaysCourses,
@@ -58,6 +61,11 @@ export default function AttendancePage() {
     }
   };
 
+
+   useEffect(() => {
+    setPageTitle("Émargement des cours");
+  }, [setPageTitle]);
+  
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -80,10 +88,12 @@ export default function AttendancePage() {
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>
-          </div>
+          </div>{" "}
           <div className="flex gap-3 ml-auto">
             <FeedbackDialog />
             <ModeToggle />
+            {/* Composant de notification */}
+            <NotificationDropdown />
             <UserDropdown />
           </div>
         </header>
@@ -119,22 +129,21 @@ export default function AttendancePage() {
                   Actualiser
                 </Button>
               </div>
-
               <TabsContent value="today" className="mt-0">
                 <TodaysCoursesList
                   courses={todaysCourses || []}
                   isLoading={isTodayLoading}
                   onAttendanceSubmitted={() => refetchTodaysCourses()}
                 />
-              </TabsContent>
-
+              </TabsContent>{" "}
               <TabsContent value="week" className="mt-0">
-                <WeeklyCoursesCalendar
-                  courses={weekCourses || []}
-                  isLoading={isWeekLoading}
-                  onAttendanceSubmitted={() => refetchWeekCourses()}
-                  weekStartDate={selectedWeekStart}
-                />
+                <CalendarProvider>
+                  <AttendanceCalendar
+                    courses={weekCourses || []}
+                    isLoading={isWeekLoading}
+                    onAttendanceSubmitted={() => refetchWeekCourses()}
+                  />
+                </CalendarProvider>
               </TabsContent>
             </Tabs>
           ) : (

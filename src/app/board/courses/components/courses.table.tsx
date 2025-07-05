@@ -26,7 +26,7 @@ interface CoursesTableProps {
   onDelete: () => void;
 }
 
-export function CoursesTable({ courses, isLoading, isAdmin, onEdit, onDelete }: CoursesTableProps) {
+export function CoursesTable({ courses, isLoading, isAdmin, onEdit, onDelete }: Readonly<CoursesTableProps>) {
   const { mutate: deleteCourse } = useDeleteCourseMutation();
 
   const handleDelete = (id: string) => {
@@ -71,7 +71,7 @@ export function CoursesTable({ courses, isLoading, isAdmin, onEdit, onDelete }: 
             <TableRow key={course.id}>
               <TableCell className="font-medium">{course.name}</TableCell>
               <TableCell>{course.volumeHoraire} heures</TableCell>
-              <TableCell>{course.programme?.name || "-"}</TableCell>
+              <TableCell>{course.programme?.name ?? "-"}</TableCell>
               <TableCell>{formatDate(course.createdAt)}</TableCell>
               <TableCell>{formatDate(course.updatedAt)}</TableCell>
               <TableCell className="text-right">
@@ -101,7 +101,7 @@ export function CoursesTable({ courses, isLoading, isAdmin, onEdit, onDelete }: 
                           <AlertDialogCancel>Annuler</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(course.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-destructive text-white hover:bg-destructive/90"
                           >
                             Supprimer
                           </AlertDialogAction>

@@ -26,8 +26,10 @@ interface ProgramsTableProps {
   onDelete: () => void;
 }
 
-export function ProgramsTable({ programs, isLoading, isAdmin, onEdit, onDelete }: ProgramsTableProps) {
+export function ProgramsTable({ programs, isLoading, isAdmin, onEdit, onDelete }: Readonly<ProgramsTableProps>) {
   const { mutate: deleteProgram } = useDeleteProgramMutation();
+
+  console.log("ProgramsTable programs:", programs);
 
   const handleDelete = (id: string) => {
     deleteProgram(id, {
@@ -69,7 +71,7 @@ export function ProgramsTable({ programs, isLoading, isAdmin, onEdit, onDelete }
           {programs.map((program) => (
             <TableRow key={program.id}>
               <TableCell className="font-medium">{program.name}</TableCell>
-              <TableCell>{program.departement?.name || "-"}</TableCell>
+              <TableCell>{program.departement?.name ?? "-"}</TableCell>
               <TableCell>{formatDate(program.createdAt)}</TableCell>
               <TableCell>{formatDate(program.updatedAt)}</TableCell>
               <TableCell className="text-right">
@@ -99,7 +101,7 @@ export function ProgramsTable({ programs, isLoading, isAdmin, onEdit, onDelete }
                           <AlertDialogCancel>Annuler</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(program.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-destructive text-white hover:bg-destructive/90"
                           >
                             Supprimer
                           </AlertDialogAction>

@@ -10,7 +10,7 @@ import {
 import { University } from "@/types/university.types";
 import { formatDate } from "@/lib/utils";
 import { useDeleteUniversityMutation } from "@/hooks/queries/use-universities.query";
-import { RiDeleteBin6Line, RiEdit2Line } from "@remixicon/react";
+import { RiDeleteBinLine, RiEdit2Line } from "@remixicon/react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,7 +31,7 @@ interface UniversitiesTableProps {
   onDelete: () => void;
 }
 
-export function UniversitiesTable({ universities, isLoading, isAdmin, onEdit, onDelete }: UniversitiesTableProps) {
+export function UniversitiesTable({ universities, isLoading, isAdmin, onEdit, onDelete }: Readonly<UniversitiesTableProps>) {
   const { mutate: deleteUniversity } = useDeleteUniversityMutation();
 
   const handleDelete = async (id: string) => {
@@ -59,8 +59,8 @@ export function UniversitiesTable({ universities, isLoading, isAdmin, onEdit, on
           universities.map((university) => (
             <TableRow key={university.id}>
               <TableCell className="font-medium">{university.name}</TableCell>
-              <TableCell>{university.organization?.name || "-"}</TableCell>
-              <TableCell>{university.responsable?.name || "-"}</TableCell>
+              <TableCell>{university.organisation?.name ?? "-"}</TableCell>
+              <TableCell>{university.responsable?.name ?? "-"}</TableCell>
               <TableCell>{formatDate(university.createdAt)}</TableCell>
               <TableCell>{formatDate(university.updatedAt)}</TableCell>
               {isAdmin && (
@@ -76,16 +76,14 @@ export function UniversitiesTable({ universities, isLoading, isAdmin, onEdit, on
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <RiDeleteBin6Line className="h-4 w-4" />
+                        <Button size="sm" variant="ghost" className="text-destructive">
+                          <RiDeleteBinLine className="h-4 w-4" />
                           <span className="sr-only">Supprimer</span>
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Êtes-vous sûr de vouloir supprimer cette université ?
-                          </AlertDialogTitle>
+                          <AlertDialogTitle>Êtes-vous sûr?</AlertDialogTitle>
                           <AlertDialogDescription>
                             Cette action est irréversible. Cette université sera définitivement supprimée.
                           </AlertDialogDescription>
@@ -94,8 +92,9 @@ export function UniversitiesTable({ universities, isLoading, isAdmin, onEdit, on
                           <AlertDialogCancel>Annuler</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(university.id)}
+                            className="bg-destructive text-white hover:bg-destructive/90"
                           >
-                            Continuer
+                            Supprimer
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>

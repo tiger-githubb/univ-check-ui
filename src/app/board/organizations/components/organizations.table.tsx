@@ -26,7 +26,7 @@ interface OrganizationsTableProps {
   onDelete: () => void;
 }
 
-export function OrganizationsTable({ organizations, isLoading, isAdmin, onEdit, onDelete }: OrganizationsTableProps) {
+export function OrganizationsTable({ organizations, isLoading, isAdmin, onEdit, onDelete }: Readonly<OrganizationsTableProps>) {
   const { mutate: deleteOrganization } = useDeleteOrganisationMutation();
 
   const handleDelete = (id: string) => {
@@ -97,7 +97,7 @@ export function OrganizationsTable({ organizations, isLoading, isAdmin, onEdit, 
                           <AlertDialogCancel>Annuler</AlertDialogCancel>
                           <AlertDialogAction
                             onClick={() => handleDelete(org.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            className="bg-destructive text-white hover:bg-destructive/90"
                           >
                             Supprimer
                           </AlertDialogAction>

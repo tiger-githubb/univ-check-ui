@@ -62,31 +62,37 @@ export const mainSections: NavMenuGroup[] = [
         title: "Années Académiques",
         url: routes.board.academicYears,
         icon: PiCalendarDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
       },
       {
         title: "Organisations",
         url: routes.board.organizations,
         icon: PiBuildingsDuotone,
+        permission: ["ADMIN"],
       },
       {
         title: "Universités",
         url: routes.board.universities,
         icon: PiBuildingDuotone,
-      },
-      {
-        title: "Programmes",
-        url: routes.board.programs,
-        icon: PiBookmarkDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
       },
       {
         title: "Départements",
         url: routes.board.departments,
         icon: PiBuildingDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
+      },
+      {
+        title: "Programmes",
+        url: routes.board.programs,
+        icon: PiBookmarkDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
       },
       {
         title: "Cours",
         url: routes.board.courses,
         icon: PiBookOpenDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
       },
       {
         title: "Sessions de cours",
@@ -97,6 +103,7 @@ export const mainSections: NavMenuGroup[] = [
         title: "Utilisateurs",
         url: routes.board.users,
         icon: PiUserDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
       },
       {
         title: "Émargement",

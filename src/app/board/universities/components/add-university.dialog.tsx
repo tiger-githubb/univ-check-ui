@@ -26,7 +26,7 @@ import { z } from "zod";
 
 const formSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  organization: z.string().min(1, "Veuillez sélectionner une organisation"),
+  organisation: z.string().min(1, "Veuillez sélectionner une organisation"),
   responsable: z.string().min(1, "Veuillez sélectionner un responsable"),
 });
 
@@ -40,7 +40,7 @@ export function AddUniversityDialog({
   isOpen,
   onOpenChange,
   onSuccess,
-}: AddUniversityDialogProps) {
+}: Readonly<AddUniversityDialogProps>) {
   const { data: organizations } = useOrganizationsQuery();
   const { data: users } = useUsersQuery();
 
@@ -48,7 +48,7 @@ export function AddUniversityDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      organization: "",
+      organisation: "",
       responsable: "",
     },
   });
@@ -91,7 +91,7 @@ export function AddUniversityDialog({
             />
             <FormField
               control={form.control}
-              name="organization"
+              name="organisation"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Organisation</FormLabel>
@@ -127,7 +127,7 @@ export function AddUniversityDialog({
                     </FormControl>
                     <SelectContent>
                       {users?.users?.map((user) => (
-                        <SelectItem key={user.id} value={user.id||""}>
+                        <SelectItem key={user.id} value={user.id ?? ""}>
                           {user.name}
                         </SelectItem>
                       ))}

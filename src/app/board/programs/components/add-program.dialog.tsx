@@ -5,20 +5,13 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDepartmentsQuery } from "@/hooks/queries/use-departments.query";
 import { useCreateProgramMutation } from "@/hooks/queries/use-program.query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-// Import departements hook/query for select
-// In a real implementation, you would fetch the list of departements from your API
-// This is a placeholder for demonstration purposes
-const departements = [
-  { id: "1", name: "Informatique" },
-  { id: "2", name: "Mathématiques" },
-  { id: "3", name: "Physique" },
-];
 
 const programSchema = z.object({
   name: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
@@ -33,7 +26,8 @@ interface AddProgramDialogProps {
   onSuccess?: () => void;
 }
 
-export function AddProgramDialog({ isOpen, onOpenChange, onSuccess }: AddProgramDialogProps) {
+export function AddProgramDialog({ isOpen, onOpenChange, onSuccess }: Readonly<AddProgramDialogProps>) {
+  const { data: departements } = useDepartmentsQuery();
   const { mutate: createProgram, isPending } = useCreateProgramMutation();
 
   const form = useForm<FormValues>({
@@ -96,7 +90,7 @@ export function AddProgramDialog({ isOpen, onOpenChange, onSuccess }: AddProgram
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {departements.map((dept) => (
+                      {departements?.departments.map((dept) => (
                         <SelectItem key={dept.id} value={dept.id}>
                           {dept.name}
                         </SelectItem>

@@ -1,13 +1,17 @@
-import { Button } from "@/components/ui/button";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useDeleteDepartmentMutation } from "@/hooks/queries/use-departments.query";
 import { Department } from "@/types/departments.types";
 import { RiDeleteBinLine, RiEdit2Line } from "@remixicon/react";
 import React from "react";
@@ -15,24 +19,22 @@ import React from "react";
 interface DepartmentsTableProps {
   departments: Department[];
   isLoading: boolean;
-  page: number;
-  limit: number;
-  total: number;
-  onPageChange: (page: number) => void;
+  isAdmin: boolean;
   onEdit: (department: Department) => void;
-  onDelete: (departmentId: string) => void;
+  onDelete: () => void;
 }
 
-const DepartmentsTable: React.FC<DepartmentsTableProps> = ({
-  departments,
-  isLoading,
-  page,
-  limit,
-  total,
-  onPageChange,
-  onEdit,
-  onDelete,
-}) => {
+export function DepartmentsTable({ departments, isLoading, isAdmin, onEdit, onDelete }: Readonly<DepartmentsTableProps>) {
+  const { mutate: deleteDepartement } = useDeleteDepartmentMutation();
+
+  const handleDelete = (id: string) => {
+    deleteDepartement(id, {
+      onSuccess: () => {
+        onDelete();
+      },
+    });
+  };
+
   if (isLoading) {
     return <div>Chargement des départements...</div>;
   }
@@ -55,57 +57,48 @@ const DepartmentsTable: React.FC<DepartmentsTableProps> = ({
           {departments.map((department) => (
             <TableRow key={department.id}>
               <TableCell>{department.name}</TableCell>
-              <TableCell>{department.university.name}</TableCell>
-              <TableCell>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => onEdit(department)} className="flex items-center gap-1">
-                    <RiEdit2Line size={16} />
-                    Modifier
-                  </Button>
-                  <Button variant="destructive" size="sm" onClick={() => onDelete(department.id)} className="flex items-center gap-1">
-                    <RiDeleteBinLine size={16} />
-                    Supprimer
-                  </Button>
-                </div>
+              <TableCell>{department.university?.name ?? "-"}</TableCell>
+              <TableCell className="text-right">
+                {isAdmin && (
+                  <div className="flex justify-end gap-2">
+                    <Button size="sm" variant="ghost" onClick={() => onEdit(department)}>
+                      <RiEdit2Line className="h-4 w-4" />
+                      <span className="sr-only">Modifier</span>
+                    </Button>
+
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button size="sm" variant="ghost" className="text-destructive">
+                          <RiDeleteBinLine className="h-4 w-4" />
+                          <span className="sr-only">Supprimer</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Êtes-vous sûr?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Cette action ne peut pas être annulée. Cela supprimera définitivement le département{" "}
+                            {department.name}.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDelete(department.id)}
+                            className="bg-destructive text-white hover:bg-destructive/90"
+                          >
+                            Supprimer
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                )}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
-      </Table>{" "}
-      <Pagination className="mt-4">
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              onClick={() => page > 1 && onPageChange(page - 1)}
-              className={page <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-
-          {[...Array(Math.ceil(total / limit))].map((_, i) => {
-            const pageNumber = i + 1;
-            // Afficher la première page, la page courante, la dernière page, et une page avant et après la page courante
-            if (pageNumber === 1 || pageNumber === Math.ceil(total / limit) || (pageNumber >= page - 1 && pageNumber <= page + 1)) {
-              return (
-                <PaginationItem key={pageNumber}>
-                  <PaginationLink isActive={pageNumber === page} onClick={() => onPageChange(pageNumber)}>
-                    {pageNumber}
-                  </PaginationLink>
-                </PaginationItem>
-              );
-            }
-            return null;
-          })}
-
-          <PaginationItem>
-            <PaginationNext
-              onClick={() => page < Math.ceil(total / limit) && onPageChange(page + 1)}
-              className={page >= Math.ceil(total / limit) ? "pointer-events-none opacity-50" : "cursor-pointer"}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      </Table>
     </div>
   );
 };
-
-export default DepartmentsTable;

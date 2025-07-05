@@ -7,7 +7,7 @@ export class DepartmentService {
     const token = getAuthToken();
     if (!token) throw new Error("Non authentifié");
 
-    const { data } = await api.get(`/api/v1/departmens`, {
+    const { data } = await api.get(`/api/v1/departments`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return data;
@@ -17,7 +17,7 @@ export class DepartmentService {
     const token = getAuthToken();
     if (!token) throw new Error("Non authentifié");
 
-    const { data } = await api.get(`/api/v1/departmens/${id}`, {
+    const { data } = await api.get(`/api/v1/departments/${id}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return data;
@@ -27,7 +27,7 @@ export class DepartmentService {
     const token = getAuthToken();
     if (!token) throw new Error("Non authentifié");
 
-    const { data } = await api.post(`/api/v1/departmens`, input, {
+    const { data } = await api.post(`/api/v1/departments`, input, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return data;
@@ -38,7 +38,7 @@ export class DepartmentService {
     if (!token) throw new Error("Non authentifié");
 
     const { id, ...updateData } = department;
-    const { data } = await api.put(`/api/v1/departmens/${id}`, updateData, {
+    const { data } = await api.put(`/api/v1/departments/${id}`, updateData, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return data;

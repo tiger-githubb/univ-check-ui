@@ -23,7 +23,7 @@ interface EditAcademicYearDialogProps {
   academicYear: AcademicYear | null;
 }
 
-export function EditAcademicYearDialog({ isOpen, onOpenChange, academicYear }: EditAcademicYearDialogProps) {
+export function EditAcademicYearDialog({ isOpen, onOpenChange, academicYear }: Readonly<EditAcademicYearDialogProps>) {
   const { mutate: updateAcademicYear, isSuccess, isPending } = useUpdateAcademicYearMutation();
 
   const form = useForm<FormValues>({

@@ -5,6 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUpdateDepartmentMutation } from "@/hooks/queries/use-departments.query";
+import { useUniversitiesQuery } from "@/hooks/queries/use-universities.query";
 import { Department } from "@/types/departments.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
@@ -25,12 +26,12 @@ export function EditDepartmentDialog({
   open,
   onOpenChange,
   onSuccess,
-}: {
+}: Readonly<{
   department: Department | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
-}) {
+}>) {
   const form = useForm<DepartmentFormInput>({
     resolver: zodResolver(departmentSchema),
     defaultValues: {
@@ -40,6 +41,7 @@ export function EditDepartmentDialog({
     },
   });
 
+  const { data: universities } = useUniversitiesQuery();
   const { mutate: updateDepartment, isPending } = useUpdateDepartmentMutation();
 
   // Mise à jour des valeurs du formulaire lorsque le département change
@@ -112,9 +114,11 @@ export function EditDepartmentDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {/* Remplacez ces éléments par les données réelles des universités */}
-                      <SelectItem value="university-1">Université 1</SelectItem>
-                      <SelectItem value="university-2">Université 2</SelectItem>
+                      {universities?.map((univ) => (
+                        <SelectItem key={univ.id} value={univ.id}>
+                          {univ.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />

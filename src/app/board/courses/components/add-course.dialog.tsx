@@ -26,7 +26,7 @@ interface AddCourseDialogProps {
   onSuccess?: () => void;
 }
 
-export function AddCourseDialog({ isOpen, onOpenChange, onSuccess }: AddCourseDialogProps) {
+export function AddCourseDialog({ isOpen, onOpenChange, onSuccess }: Readonly<AddCourseDialogProps>) {
   const { mutate: createCourse, isPending } = useCreateCourseMutation();
   const { data: programs = [] } = useProgramsQuery();
 

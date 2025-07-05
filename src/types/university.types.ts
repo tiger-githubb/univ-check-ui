@@ -1,7 +1,7 @@
 export interface University {
   id: string;
   name: string;
-  organization?: {
+  organisation?: {
     id: string;
     name: string;
   };
@@ -16,13 +16,13 @@ export interface University {
 
 export interface CreateUniversityInput {
   name: string;
-  organization: string;
+  organisation: string;
   responsable: string;
 }
 
 export interface UpdateUniversityInput {
   id: string;
   name?: string;
-  organization?: string;
+  organisation?: string;
   responsable?: string;
 }
