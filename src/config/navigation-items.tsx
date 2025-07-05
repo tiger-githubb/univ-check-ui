@@ -10,6 +10,7 @@ import {
   PiGearDuotone,
   PiHouseDuotone,
   PiUserDuotone,
+  PiBellDuotone,
 } from "react-icons/pi";
 import { routes } from "./routes";
 

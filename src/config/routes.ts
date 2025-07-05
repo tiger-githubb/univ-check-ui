@@ -9,8 +9,7 @@ export const routes = {
     home: "/board",
     users: "/board/users",
     profile: "/board/profile",
-    settings: "/board/settings",
-    academicYears: "/board/academic-years",
+    settings: "/board/settings",    academicYears: "/board/academic-years",
     organizations: "/board/organizations",
     attendance: "/board/attendance",
     attendanceAdmin: "/board/attendance-admin",
@@ -19,5 +18,6 @@ export const routes = {
     programs: "/board/programs",
     universities: "/board/universities",
     classSessions: "/board/class-sessions",
+    notifications: "/board/notifications",
   },
 };
