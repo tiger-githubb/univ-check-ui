@@ -1,6 +1,7 @@
 "use client";
 
 import { addDays, addMonths, addWeeks, endOfWeek, format, isSameMonth, startOfWeek, subMonths, subWeeks } from "date-fns";
+import { fr } from "date-fns/locale";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -12,8 +13,7 @@ import { AgendaDaysToShow, EventGap, EventHeight, WeekCellsHeight } from "@/comp
 import { DayView } from "@/components/day-view";
 import { EventDialog } from "@/components/event-dialog";
 import { MonthView } from "@/components/month-view";
-import Participants from "@/components/participants";
-import ThemeToggle from "@/components/theme-toggle";
+// import Participants from "@/components/participants";
 import { CalendarEvent, CalendarView } from "@/components/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +23,6 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { addHoursToDate } from "@/components/utils";
 import { WeekView } from "@/components/week-view";
 import { cn } from "@/lib/utils";
@@ -35,6 +34,14 @@ export interface EventCalendarProps {
   onEventDelete?: (eventId: string) => void;
   className?: string;
   initialView?: CalendarView;
+  showCreateButton?: boolean;
+  CustomEventDialog?: React.ComponentType<{
+    event: CalendarEvent | null;
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (event: CalendarEvent) => void;
+    onDelete: (eventId: string) => void;
+  }>;
 }
 
 export function EventCalendar({
@@ -44,13 +51,14 @@ export function EventCalendar({
   onEventDelete,
   className,
   initialView = "month",
+  showCreateButton = true,
+  CustomEventDialog,
 }: EventCalendarProps) {
   // Use the shared calendar context instead of local state
   const { currentDate, setCurrentDate } = useCalendarContext();
   const [view, setView] = useState<CalendarView>(initialView);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const { open } = useSidebar();
 
   // Add keyboard shortcuts for view switching
   useEffect(() => {
@@ -158,8 +166,8 @@ export function EventCalendar({
     if (event.id) {
       onEventUpdate?.(event);
       // Show toast notification when an event is updated
-      toast(`Event "${event.title}" updated`, {
-        description: format(new Date(event.start), "MMM d, yyyy"),
+      toast(`Session "${event.title}" mise à jour`, {
+        description: format(new Date(event.start), "d MMM yyyy", { locale: fr }),
         position: "bottom-left",
       });
     } else {
@@ -168,8 +176,8 @@ export function EventCalendar({
         id: Math.random().toString(36).substring(2, 11),
       });
       // Show toast notification when an event is added
-      toast(`Event "${event.title}" added`, {
-        description: format(new Date(event.start), "MMM d, yyyy"),
+      toast(`Session "${event.title}" ajoutée`, {
+        description: format(new Date(event.start), "d MMM yyyy", { locale: fr }),
         position: "bottom-left",
       });
     }
@@ -185,8 +193,8 @@ export function EventCalendar({
 
     // Show toast notification when an event is deleted
     if (deletedEvent) {
-      toast(`Event "${deletedEvent.title}" deleted`, {
-        description: format(new Date(deletedEvent.start), "MMM d, yyyy"),
+      toast(`Session "${deletedEvent.title}" supprimée`, {
+        description: format(new Date(deletedEvent.start), "d MMM yyyy", { locale: fr }),
         position: "bottom-left",
       });
     }
@@ -196,33 +204,33 @@ export function EventCalendar({
     onEventUpdate?.(updatedEvent);
 
     // Show toast notification when an event is updated via drag and drop
-    toast(`Event "${updatedEvent.title}" moved`, {
-      description: format(new Date(updatedEvent.start), "MMM d, yyyy"),
+    toast(`Session "${updatedEvent.title}" déplacée`, {
+      description: format(new Date(updatedEvent.start), "d MMM yyyy", { locale: fr }),
       position: "bottom-left",
     });
   };
 
   const viewTitle = useMemo(() => {
     if (view === "month") {
-      return format(currentDate, "MMMM yyyy");
+      return format(currentDate, "MMMM yyyy", { locale: fr });
     } else if (view === "week") {
-      const start = startOfWeek(currentDate, { weekStartsOn: 0 });
-      const end = endOfWeek(currentDate, { weekStartsOn: 0 });
+      const start = startOfWeek(currentDate, { weekStartsOn: 1 }); // Lundi = 1
+      const end = endOfWeek(currentDate, { weekStartsOn: 1 });
       if (isSameMonth(start, end)) {
-        return format(start, "MMMM yyyy");
+        return format(start, "MMMM yyyy", { locale: fr });
       } else {
-        return `${format(start, "MMM")} - ${format(end, "MMM yyyy")}`;
+        return `${format(start, "MMM", { locale: fr })} - ${format(end, "MMM yyyy", { locale: fr })}`;
       }
     } else if (view === "day") {
       return (
         <>
           <span className="min-sm:hidden" aria-hidden="true">
-            {format(currentDate, "MMM d, yyyy")}
+            {format(currentDate, "d MMM yyyy", { locale: fr })}
           </span>
           <span className="max-sm:hidden min-md:hidden" aria-hidden="true">
-            {format(currentDate, "MMMM d, yyyy")}
+            {format(currentDate, "d MMMM yyyy", { locale: fr })}
           </span>
-          <span className="max-md:hidden">{format(currentDate, "EEE MMMM d, yyyy")}</span>
+          <span className="max-md:hidden">{format(currentDate, "EEEE d MMMM yyyy", { locale: fr })}</span>
         </>
       );
     } else if (view === "agenda") {
@@ -231,12 +239,12 @@ export function EventCalendar({
       const end = addDays(currentDate, AgendaDaysToShow - 1);
 
       if (isSameMonth(start, end)) {
-        return format(start, "MMMM yyyy");
+        return format(start, "MMMM yyyy", { locale: fr });
       } else {
-        return `${format(start, "MMM")} - ${format(end, "MMM yyyy")}`;
+        return `${format(start, "MMM", { locale: fr })} - ${format(end, "MMM yyyy", { locale: fr })}`;
       }
     } else {
-      return format(currentDate, "MMMM yyyy");
+      return format(currentDate, "MMMM yyyy", { locale: fr });
     }
   }, [currentDate, view]);
 
@@ -255,16 +263,9 @@ export function EventCalendar({
         <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-5 sm:px-4", className)}>
           <div className="flex sm:flex-col max-sm:items-center justify-between gap-1.5">
             <div className="flex items-center gap-1.5">
-              <SidebarTrigger
-                data-state={open ? "invisible" : "visible"}
-                data-outside-sidebar="true"
-                className="peer size-7 text-muted-foreground/80 hover:text-foreground/80 hover:bg-transparent! sm:-ms-1.5 lg:data-[state=invisible]:opacity-0 lg:data-[state=invisible]:pointer-events-none transition-opacity ease-in-out duration-200"
-              />
-              <h2 className="font-semibold text-xl lg:peer-data-[state=invisible]:-translate-x-7.5 transition-transform ease-in-out duration-300">
-                {viewTitle}
-              </h2>
+              <h2 className="font-semibold text-xl transition-transform ease-in-out duration-300">{viewTitle}</h2>
             </div>
-            <Participants />
+            {/* <Participants /> */}
           </div>
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center justify-between gap-2">
@@ -277,20 +278,22 @@ export function EventCalendar({
                 </Button>
               </div>
               <Button className="max-sm:h-8 max-sm:px-2.5!" onClick={handleToday}>
-                Today
+                Aujourd&apos;hui
               </Button>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <Button
-                variant="outline"
-                className="max-sm:h-8 max-sm:px-2.5!"
-                onClick={() => {
-                  setSelectedEvent(null); // Ensure we're creating a new event
-                  setIsEventDialogOpen(true);
-                }}
-              >
-                New Event
-              </Button>
+              {showCreateButton && (
+                <Button
+                  variant="outline"
+                  className="max-sm:h-8 max-sm:px-2.5!"
+                  onClick={() => {
+                    setSelectedEvent(null); // Ensure we're creating a new event
+                    setIsEventDialogOpen(true);
+                  }}
+                >
+                  Nouvelle session
+                </Button>
+              )}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="gap-1.5 max-sm:h-8 max-sm:px-2! max-sm:gap-1">
@@ -300,13 +303,13 @@ export function EventCalendar({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="min-w-32">
                   <DropdownMenuItem onClick={() => setView("month")}>
-                    Month <DropdownMenuShortcut>M</DropdownMenuShortcut>
+                    Mois <DropdownMenuShortcut>M</DropdownMenuShortcut>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setView("week")}>
-                    Week <DropdownMenuShortcut>W</DropdownMenuShortcut>
+                    Semaine <DropdownMenuShortcut>W</DropdownMenuShortcut>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setView("day")}>
-                    Day <DropdownMenuShortcut>D</DropdownMenuShortcut>
+                    Jour <DropdownMenuShortcut>D</DropdownMenuShortcut>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => setView("agenda")}>
                     Agenda <DropdownMenuShortcut>A</DropdownMenuShortcut>
@@ -330,16 +333,29 @@ export function EventCalendar({
           {view === "agenda" && <AgendaView currentDate={currentDate} events={events} onEventSelect={handleEventSelect} />}
         </div>
 
-        <EventDialog
-          event={selectedEvent}
-          isOpen={isEventDialogOpen}
-          onClose={() => {
-            setIsEventDialogOpen(false);
-            setSelectedEvent(null);
-          }}
-          onSave={handleEventSave}
-          onDelete={handleEventDelete}
-        />
+        {CustomEventDialog ? (
+          <CustomEventDialog
+            event={selectedEvent}
+            isOpen={isEventDialogOpen}
+            onClose={() => {
+              setIsEventDialogOpen(false);
+              setSelectedEvent(null);
+            }}
+            onSave={handleEventSave}
+            onDelete={handleEventDelete}
+          />
+        ) : (
+          <EventDialog
+            event={selectedEvent}
+            isOpen={isEventDialogOpen}
+            onClose={() => {
+              setIsEventDialogOpen(false);
+              setSelectedEvent(null);
+            }}
+            onSave={handleEventSave}
+            onDelete={handleEventDelete}
+          />
+        )}
       </CalendarDndProvider>
     </div>
   );

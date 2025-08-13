@@ -12,6 +12,7 @@ import {
   startOfMonth,
   startOfWeek,
 } from "date-fns";
+import { fr } from "date-fns/locale";
 import React, { useEffect, useMemo, useState } from "react";
 
 import { useEventVisibility } from "@/components";
@@ -34,16 +35,16 @@ export function MonthView({ currentDate, events, onEventSelect, onEventCreate }:
   const days = useMemo(() => {
     const monthStart = startOfMonth(currentDate);
     const monthEnd = endOfMonth(monthStart);
-    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
-    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+    const calendarStart = startOfWeek(monthStart, { weekStartsOn: 1 }); // Lundi = 1
+    const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
 
     return eachDayOfInterval({ start: calendarStart, end: calendarEnd });
   }, [currentDate]);
 
   const weekdays = useMemo(() => {
     return Array.from({ length: 7 }).map((_, i) => {
-      const date = addDays(startOfWeek(new Date()), i);
-      return format(date, "EEE");
+      const date = addDays(startOfWeek(new Date(), { weekStartsOn: 1 }), i); // Lundi = 1
+      return format(date, "EEE", { locale: fr });
     });
   }, []);
 
@@ -195,7 +196,7 @@ export function MonthView({ currentDate, events, onEventSelect, onEventCreate }:
                             }
                           >
                             <div className="space-y-2">
-                              <div className="text-sm font-medium">{format(day, "EEE d")}</div>
+                              <div className="text-sm font-medium">{format(day, "EEE d", { locale: fr })}</div>
                               <div className="space-y-1">
                                 {sortEvents(allEvents).map((event) => {
                                   const eventStart = new Date(event.start);

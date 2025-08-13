@@ -16,6 +16,7 @@ import {
   startOfDay,
   startOfWeek,
 } from "date-fns";
+import { fr } from "date-fns/locale";
 import React, { useMemo } from "react";
 
 import { useCurrentTimeIndicator } from "@/components";
@@ -45,8 +46,8 @@ interface PositionedEvent {
 
 export function WeekView({ currentDate, events, onEventSelect, onEventCreate }: WeekViewProps) {
   const days = useMemo(() => {
-    const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
-    const weekEnd = endOfWeek(currentDate, { weekStartsOn: 0 });
+    const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 }); // Lundi = 1
+    const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
     return eachDayOfInterval({ start: weekStart, end: weekEnd });
   }, [currentDate]);
 
@@ -202,9 +203,9 @@ export function WeekView({ currentDate, events, onEventSelect, onEventCreate }: 
             data-today={isToday(day) || undefined}
           >
             <span className="sm:hidden" aria-hidden="true">
-              {format(day, "E")[0]} {format(day, "d")}
+              {format(day, "E", { locale: fr })[0]} {format(day, "d")}
             </span>
-            <span className="max-sm:hidden">{format(day, "EEE dd")}</span>
+            <span className="max-sm:hidden">{format(day, "EEE dd", { locale: fr })}</span>
           </div>
         ))}
       </div>
@@ -214,7 +215,7 @@ export function WeekView({ currentDate, events, onEventSelect, onEventCreate }: 
           <div className="grid grid-cols-8">
             <div className="border-border/70 relative border-r">
               <span className="text-muted-foreground/70 absolute bottom-0 left-0 h-6 w-16 max-w-full pe-2 text-right text-[10px] sm:pe-4 sm:text-xs">
-                All day
+                Toute la journée
               </span>
             </div>
             {days.map((day, dayIndex) => {

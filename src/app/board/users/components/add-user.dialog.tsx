@@ -1,14 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -16,7 +8,6 @@ import { useCreateUserMutation } from "@/hooks/queries/use-user.query";
 import { UserRole } from "@/types/auth.types";
 import { UserCreateInput } from "@/types/user.types";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { RiUserAddLine } from "@remixicon/react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -38,7 +29,6 @@ interface AddUserDialogProps {
 }
 
 export default function AddUserDialog({ isOpen, onOpenChange, onSuccess }: Readonly<AddUserDialogProps>) {
-
   const form = useForm<UserFormInput>({
     resolver: zodResolver(userSchema),
     defaultValues: {

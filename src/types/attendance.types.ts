@@ -101,3 +101,15 @@ export interface UpdateEmargementInput {
   id: string;
   status?: "PENDING" | "PRESENT" | "ABSENT" | "SUPERVISOR_CONFIRMED" | "CLASS_HEADER_CONFIRMED";
 }
+
+// Interface pour les cours à venir avec informations simplifiées
+export interface UpcomingCourse {
+  id: string;
+  title: string;
+  professor: string;
+  startTime: string;
+  endTime: string;
+  location: string;
+  date: string;
+  department: string;
+}

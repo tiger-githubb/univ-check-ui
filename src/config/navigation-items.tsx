@@ -97,6 +97,7 @@ export const mainSections: NavMenuGroup[] = [
         title: "Sessions de cours",
         url: routes.board.classSessions,
         icon: PiCalendarCheckDuotone,
+        permission: ["ADMIN", "SUPERVISOR"],
       },
       {
         title: "Utilisateurs",

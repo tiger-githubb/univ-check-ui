@@ -1,87 +1,61 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { useCalendarContext } from "@/components/calendar-context";
-import { ClassSession, Course } from "@/types/attendance.types";
 import { EventCalendar } from "@/components/event-calendar";
 import { CalendarEvent, EventColor } from "@/components/types";
-import { useCurrentUser } from "@/hooks/queries/use-auth.query";
 import { useEmargementMutation } from "@/hooks/queries/use-attendance.query";
+import { useCurrentUser } from "@/hooks/queries/use-auth.query";
+import { ClassSession } from "@/types/attendance.types";
+import { useMemo, useState } from "react";
+import { PiSpinnerGap } from "react-icons/pi";
 import { toast } from "sonner";
 
 interface AttendanceCalendarProps {
   classSessions?: ClassSession[];
-  courses?: Course[];
   isLoading?: boolean;
   onAttendanceSubmitted?: () => void;
 }
 
 // Transform class session to calendar event with attendance capabilities
-const transformToAttendanceEvent = (item: ClassSession | Course): CalendarEvent => {
-  let sessionDate: Date;
-  let start: Date;
-  let end: Date;
-  let id: string;
-  let title: string;
-  let description: string;
-  let location: string;
+const transformToAttendanceEvent = (session: ClassSession): CalendarEvent => {
+  const sessionDate = new Date(session.date);
+  const [startHour, startMinute] = session.heureDebut.split(":").map(Number);
+  const [endHour, endMinute] = session.heureFin.split(":").map(Number);
 
-  // Handle both ClassSession and Course types
-  if ('date' in item) {
-    // ClassSession
-    sessionDate = new Date(item.date);
-    const [startHour, startMinute] = item.heureDebut.split(':').map(Number);
-    const [endHour, endMinute] = item.heureFin.split(':').map(Number);
-    
-    start = new Date(sessionDate);
-    start.setHours(startHour, startMinute, 0, 0);
-    
-    end = new Date(sessionDate);
-    end.setHours(endHour, endMinute, 0, 0);
+  const start = new Date(sessionDate);
+  start.setHours(startHour, startMinute, 0, 0);
 
-    id = item.id;
-    title = item.course?.title || 'Course Session';
-    description = `Professor: ${item.professor?.name || 'TBD'}\nClass Rep: ${item.classRepresentative?.name || 'TBD'}\nAcademic Year: ${item.academicYear?.periode || 'TBD'}`;
-    location = item.course?.location || 'TBD';
-  } else {
-    // Course
-    sessionDate = new Date(); // Current date for courses without specific date
-    const [startHour, startMinute] = item.startTime.split(':').map(Number);
-    const [endHour, endMinute] = item.endTime.split(':').map(Number);
-    
-    start = new Date(sessionDate);
-    start.setHours(startHour, startMinute, 0, 0);
-    
-    end = new Date(sessionDate);
-    end.setHours(endHour, endMinute, 0, 0);
+  const end = new Date(sessionDate);
+  end.setHours(endHour, endMinute, 0, 0);
 
-    id = item.id;
-    title = item.title;
-    description = `Location: ${item.location}\nAttendance Required: ${item.hasAttendance ? 'Yes' : 'No'}`;
-    location = item.location;
-  }
+  const id = session.id;
+  const title = session.course?.title || "Session de cours";
+  const description = `Professeur: ${session.professor?.name || "TBD"}\nDélégué: ${
+    session.classRepresentative?.name || "TBD"
+  }\nAnnée académique: ${session.academicYear?.periode || "TBD"}`;
+  const location = session.course?.location || "TBD";
 
   // Color coding based on attendance status and time
   let color: EventColor = "blue";
-  
+
   const now = new Date();
   const isPast = end < now;
   const isCurrent = start <= now && end >= now;
-  
+
   if (isCurrent) {
-    color = "orange"; // Currently active session
+    color = "orange"; // Session active actuellement
   } else if (isPast) {
-    color = "emerald"; // Past session - assume attended
+    color = "emerald"; // Session passée - supposé présent
   } else {
-    color = "blue"; // Future session
+    color = "blue"; // Session future
   }
 
-  // Mark sessions requiring attendance
-  if ('hasAttendance' in item && item.hasAttendance) {
+  // Marquer les sessions nécessitant émargement
+  if (session.course?.hasAttendance) {
     color = isPast ? "violet" : "rose";
   }
 
-  const timeStatus = isCurrent ? " (Active)" : isPast ? " (Completed)" : " (Upcoming)";
+  const timeStatus = isCurrent ? " (Actif)" : isPast ? " (Terminé)" : " (À venir)";
 
   return {
     id,
@@ -91,47 +65,37 @@ const transformToAttendanceEvent = (item: ClassSession | Course): CalendarEvent 
     end,
     color,
     location,
-    label: title
+    label: title,
   };
 };
 
-export default function AttendanceCalendar({ 
-  classSessions = [], 
-  courses = [], 
-  isLoading = false, 
-  onAttendanceSubmitted 
-}: AttendanceCalendarProps) {
+export default function AttendanceCalendar({ classSessions = [], isLoading = false, onAttendanceSubmitted }: AttendanceCalendarProps) {
   const { isColorVisible } = useCalendarContext();
   const { data: user } = useCurrentUser();
   const { mutate: submitEmargement, isPending } = useEmargementMutation();
 
   // Combine class sessions and courses
   const allItems = useMemo(() => {
-    return [...classSessions, ...courses];
-  }, [classSessions, courses]);
+    return [...classSessions];
+  }, [classSessions]);
 
   // Filter items based on user role
   const filteredItems = useMemo(() => {
     if (!user?.user) return allItems;
-    
+
     const userRole = user.user.role;
     const userId = user.user.id;
-    
+
     // Admins see all items
     if (userRole === "ADMIN") {
       return allItems;
     }
-    
+
     // Teachers see only their own sessions
     if (userRole === "TEACHER") {
-      return allItems.filter(item => {
-        if ('professor' in item) {
-          return item.professor?.id === userId;
-        }
-        return true; // Show all courses for now
-      });
+      return allItems.filter((session) => session.professor?.id === userId);
     }
-    
+
     // Students see sessions where they are class representative or all sessions
     return allItems;
   }, [allItems, user]);
@@ -143,7 +107,7 @@ export default function AttendanceCalendar({
 
   // Additional events that can be added by users
   const [additionalEvents, setAdditionalEvents] = useState<CalendarEvent[]>([]);
-  
+
   // Combine attendance events with additional events
   const allEvents = useMemo(() => {
     return [...attendanceEvents, ...additionalEvents];
@@ -155,22 +119,22 @@ export default function AttendanceCalendar({
   }, [allEvents, isColorVisible]);
 
   const handleEventAdd = (event: CalendarEvent) => {
-    setAdditionalEvents(prev => [...prev, event]);
+    setAdditionalEvents((prev) => [...prev, event]);
   };
 
   const handleEventUpdate = (updatedEvent: CalendarEvent) => {
     // Check if this is an attendance event
-    const isAttendanceEvent = filteredItems.some(item => item.id === updatedEvent.id);
-    
+    const isAttendanceEvent = filteredItems.some((session) => session.id === updatedEvent.id);
+
     if (isAttendanceEvent) {
       // Handle attendance marking
       const now = new Date();
       const eventStart = new Date(updatedEvent.start);
       const eventEnd = new Date(updatedEvent.end);
-      
+
       // Check if session is currently active or recently ended (within 30 minutes)
       const isActive = eventStart <= now && eventEnd >= new Date(now.getTime() - 30 * 60 * 1000);
-      
+
       if (isActive && user?.user?.role === "TEACHER") {
         // Submit attendance
         submitEmargement(
@@ -178,38 +142,34 @@ export default function AttendanceCalendar({
             classSessionId: updatedEvent.id,
             professorId: user.user.id,
             status: "PRESENT",
-            comments: "Marked via calendar"
+            comments: "Émargé via calendrier",
           },
           {
             onSuccess: () => {
-              toast.success("Attendance marked successfully!");
+              toast.success("Émargement enregistré avec succès !");
               onAttendanceSubmitted?.();
             },
             onError: (error: Error) => {
-              toast.error("Failed to mark attendance: " + error.message);
-            }
+              toast.error("Échec de l'émargement : " + error.message);
+            },
           }
         );
       } else {
-        toast.warning("Attendance can only be marked during active sessions.");
+        toast.warning("L'émargement ne peut être effectué que pendant les sessions actives.");
       }
     } else {
       // Update additional events
-      setAdditionalEvents(prev =>
-        prev.map((event) =>
-          event.id === updatedEvent.id ? updatedEvent : event,
-        ),
-      );
+      setAdditionalEvents((prev) => prev.map((event) => (event.id === updatedEvent.id ? updatedEvent : event)));
     }
   };
 
   const handleEventDelete = (eventId: string) => {
     // Only allow deleting additional events, not attendance events
-    const isAttendanceEvent = filteredItems.some(item => item.id === eventId);
+    const isAttendanceEvent = filteredItems.some((session) => session.id === eventId);
     if (!isAttendanceEvent) {
-      setAdditionalEvents(prev => prev.filter((event) => event.id !== eventId));
+      setAdditionalEvents((prev) => prev.filter((event) => event.id !== eventId));
     } else {
-      toast.warning("Cannot delete course sessions from calendar.");
+      toast.warning("Impossible de supprimer les sessions de cours du calendrier.");
     }
   };
 
@@ -217,10 +177,8 @@ export default function AttendanceCalendar({
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">
-            {isPending ? "Submitting attendance..." : "Loading calendar..."}
-          </p>
+          <PiSpinnerGap className="h-8 w-8 animate-spin text-primary" />
+          <p className="mt-4 text-muted-foreground">{isPending ? "Envoi de l'émargement..." : "Chargement du calendrier..."}</p>
         </div>
       </div>
     );

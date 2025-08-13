@@ -1,16 +1,23 @@
-
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { Separator } from "@radix-ui/react-separator";
-import { ModeToggle } from "../theme/mode-toggle";
-import UserDropdown from "./user.dropdown";
 import { useBreadcrumb } from "@/contexts/breadcrumb.context";
+import { Separator } from "@radix-ui/react-separator";
 import { RiScanLine } from "react-icons/ri";
 import FeedbackDialog from "../others/feedback.dialog";
+import { ModeToggle } from "../theme/mode-toggle";
+import { NotificationDropdown } from "./notification.dropdown";
+import UserDropdown from "./user.dropdown";
 
 export default function AdminHeader() {
   const { pageTitle } = useBreadcrumb();
-  
+
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 border-b">
       <div className="flex flex-1 items-center gap-2 px-3">
@@ -34,6 +41,7 @@ export default function AdminHeader() {
       <div className="flex gap-3 ml-auto">
         <FeedbackDialog />
         <ModeToggle />
+        <NotificationDropdown />
         <UserDropdown />
       </div>
     </header>

@@ -25,6 +25,7 @@ import { Emargement } from "@/types/attendance.types";
 import { RiMoreLine } from "@remixicon/react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { ExportToPdfButton } from "./export-to-pdf-button";
@@ -40,6 +41,30 @@ interface AttendanceListProps {
   onPageSizeChange: (size: number) => void;
   totalItems?: number;
 }
+
+// Fonctions utilitaires pour le formatage sécurisé des dates
+const formatSafeDate = (dateStr?: string, formatString: string = "dd/MM/yyyy") => {
+  if (!dateStr) return "Date non définie";
+  try {
+    return format(parseISO(dateStr), formatString, { locale: fr });
+  } catch {
+    return "Date invalide";
+  }
+};
+
+const formatSafeTime = (timeStr?: string) => {
+  if (!timeStr) return "--:--";
+  try {
+    // Si c'est déjà au format HH:mm, on le retourne tel quel
+    if (timeStr.match(/^\d{2}:\d{2}$/)) {
+      return timeStr;
+    }
+    // Sinon, essayer de parser comme ISO
+    return format(parseISO(timeStr), "HH:mm", { locale: fr });
+  } catch {
+    return "--:--";
+  }
+};
 
 export function AttendanceList({
   emargements,
@@ -147,12 +172,11 @@ export function AttendanceList({
             ) : (
               emargements.map((emargement) => (
                 <TableRow key={emargement.id}>
-                  <TableCell className="font-medium">{emargement.professor?.name}</TableCell>
-                  <TableCell>{emargement.classSession?.course?.title}</TableCell>
-                  <TableCell>{format(parseISO(emargement.classSession?.date), "dd/MM/yyyy", { locale: fr })}</TableCell>
+                  <TableCell className="font-medium">{emargement.professor?.name || "Professeur non défini"}</TableCell>
+                  <TableCell>{emargement.classSession?.course?.title || "Cours non défini"}</TableCell>
+                  <TableCell>{formatSafeDate(emargement.classSession?.date)}</TableCell>
                   <TableCell>
-                    {format(parseISO(emargement.classSession?.heureDebut), "HH:mm", { locale: fr })} -
-                    {format(parseISO(emargement.classSession?.heureFin), "HH:mm", { locale: fr })}
+                    {formatSafeTime(emargement.classSession?.heureDebut)} - {formatSafeTime(emargement.classSession?.heureFin)}
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs ${getStatusBadgeClass(emargement.status)}`}>
@@ -170,7 +194,10 @@ export function AttendanceList({
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => openDetailsDialog(emargement)}>Voir les détails</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openDetailsDialog(emargement)}>Voir les détails (modal)</DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/board/attendance-admin/${emargement.id}`}>Voir la page détaillée</Link>
+                        </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => handleStatusChange(emargement.id, "PRESENT")}>
                           Marquer présent
@@ -291,21 +318,21 @@ export function AttendanceList({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-1">Professeur</h3>
-                  <p>{selectedEmargement.professor?.name}</p>
+                  <p>{selectedEmargement.professor?.name || "Professeur non défini"}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">Cours</h3>
-                  <p>{selectedEmargement.classSession?.course?.title}</p>
+                  <p>{selectedEmargement.classSession?.course?.title || "Cours non défini"}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">Date</h3>
-                  <p>{format(parseISO(selectedEmargement.classSession?.date), "EEEE d MMMM yyyy", { locale: fr })}</p>
+                  <p>{formatSafeDate(selectedEmargement.classSession?.date, "EEEE d MMMM yyyy")}</p>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-1">Horaire</h3>
                   <p>
-                    {format(parseISO(selectedEmargement.classSession?.heureDebut), "HH:mm", { locale: fr })} -
-                    {format(parseISO(selectedEmargement.classSession?.heureFin), "HH:mm", { locale: fr })}
+                    {formatSafeTime(selectedEmargement.classSession?.heureDebut)} -{" "}
+                    {formatSafeTime(selectedEmargement.classSession?.heureFin)}
                   </p>
                 </div>
                 <div>
@@ -322,7 +349,7 @@ export function AttendanceList({
 
               <div>
                 <h3 className="font-semibold mb-1">Dernière mise à jour</h3>
-                <p>{format(parseISO(selectedEmargement.updatedAt), "dd/MM/yyyy HH:mm", { locale: fr })}</p>
+                <p>{formatSafeDate(selectedEmargement.updatedAt, "dd/MM/yyyy HH:mm")}</p>
               </div>
             </div>
           )}{" "}

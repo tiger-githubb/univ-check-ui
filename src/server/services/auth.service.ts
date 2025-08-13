@@ -45,9 +45,9 @@ export class AuthService {
   }
 
   static async signOut(): Promise<{ success: boolean }> {
-    // Si le backend ne gère pas la session côté serveur, il suffit de supprimer le token côté client
     return { success: true };
   }
+
   static async getCurrentUser(token: string): Promise<AuthResponse["user"] | null> {
     try {
       if (!token) {

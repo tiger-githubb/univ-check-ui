@@ -1,15 +1,15 @@
 "use client";
 
+import { PageHeader } from "@/components/shared/page-header";
+import { useBreadcrumb } from "@/contexts/breadcrumb.context";
 import { useCurrentUser } from "@/hooks/queries/use-auth.query";
-import { RiBookOpenLine } from "@remixicon/react";
-import { useEffect, useState } from "react";
-import { EditCourseDialog } from "./components/edit-course.dialog";
 import { useCoursesQuery } from "@/hooks/queries/use-course.query";
 import { Course } from "@/types/course.types";
-import { CoursesTable } from "./components/courses.table";
+import { RiBookOpenLine } from "@remixicon/react";
+import { useEffect, useState } from "react";
 import { AddCourseDialog } from "./components/add-course.dialog";
-import { useBreadcrumb } from "@/contexts/breadcrumb.context";
-import { PageHeader } from "@/components/shared/page-header";
+import { CoursesTable } from "./components/courses.table";
+import { EditCourseDialog } from "./components/edit-course.dialog";
 
 export default function CoursesPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -31,13 +31,11 @@ export default function CoursesPage() {
         title={"Gestion des cours"}
         subtitle={"Gérez les cours de votre institution."}
         action={{
-          label: "Nouveeau cours",
+          label: "Nouveau cours",
           onClick: () => setIsAddDialogOpen(true),
         }}
       />
       <div className="container mx-auto py-10">
-
-
         {/* Table */}
         <div className="flex-1 overflow-auto">
           <CoursesTable

@@ -15,17 +15,15 @@ export function middleware(request: NextRequest) {
     return loginRateLimiter(request);
   }
 
-  // Protéger les routes du tableau
+  // Protection des routes /board - rediriger vers la connexion si pas de token
   if (path.startsWith("/board")) {
-    const authHeader = request.headers.get("Authorization");
-    const token = authHeader?.replace("Bearer ", "") || request.cookies.get("auth-token")?.value;
-    
+    const token = request.cookies.get("auth-token")?.value;
     if (!token) {
       return NextResponse.redirect(new URL(`/${routes.auth.signIn}`, request.url));
     }
   }
   
-  // Continuer le traitement pour les autres routes
+  // Continuer le traitement pour toutes les autres routes
   return NextResponse.next();
 }
 

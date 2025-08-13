@@ -14,14 +14,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination";
@@ -39,7 +31,6 @@ import {
   RiEdit2Line,
   RiErrorWarningLine,
   RiFilter3Line,
-  RiMoreLine,
   RiSearch2Line,
 } from "@remixicon/react";
 import {
@@ -168,8 +159,8 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
                   role === "ADMIN"
                     ? "bg-primary/80 hover:bg-primary text-primary-foreground"
                     : role === "TEACHER"
-                      ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
-                      : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
+                    ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
+                    : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
                 )}
               >
                 {role === "ADMIN"}
@@ -428,8 +419,8 @@ export default function UsersTable({ users, isLoading, page, limit, total, onPag
                             value === "ADMIN"
                               ? "bg-primary/80 hover:bg-primary text-primary-foreground"
                               : value === "TEACHER"
-                                ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
-                                : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
+                              ? "bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20"
+                              : "bg-sky-500/10 text-sky-500 border-sky-500/20 hover:bg-sky-500/20"
                           )}
                         >
                           {value === "ADMIN"}
@@ -560,7 +551,7 @@ function RowActions({
   onDelete: (id: string) => void;
   isDeleting: boolean;
 }) {
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [, setShowDeleteDialog] = useState(false);
   const [isUpdatePending, startUpdateTransition] = useTransition();
   const { mutate: deleteUser } = useDeleteUserMutation();
 
@@ -583,7 +574,6 @@ function RowActions({
   };
 
   return (
-
     <div className="flex justify-end gap-2">
       <Button size="sm" variant="ghost" onClick={() => onEdit(user)}>
         <RiEdit2Line className="h-4 w-4" />
@@ -601,14 +591,14 @@ function RowActions({
           <AlertDialogHeader>
             <AlertDialogTitle>Êtes-vous sûr?</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action ne peut pas être annulée. Cela supprimera définitivement l&apos;useranisation{" "}
-              {user.name}.
+              Cette action ne peut pas être annulée. Cela supprimera définitivement l&apos;useranisation {user.name}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Annuler</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete} disabled={isDeleting || isUpdatePending}
+              onClick={handleDelete}
+              disabled={isDeleting || isUpdatePending}
               className="bg-destructive text-white hover:bg-destructive/90"
             >
               Supprimer
@@ -617,6 +607,5 @@ function RowActions({
         </AlertDialogContent>
       </AlertDialog>
     </div>
-
   );
 }

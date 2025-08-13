@@ -7,6 +7,7 @@ import {
   CreateClassSessionInput,
   CreateEmargementInput,
   Emargement,
+  UpcomingCourse,
   UpdateAttendanceInput,
   UpdateClassSessionInput,
   UpdateEmargementInput,
@@ -255,5 +256,14 @@ export function useClassSessionsByWeekQuery(startDate: Date) {
     queryKey: ["class-sessions", "week", userId, formattedDate],
     queryFn: () => ClassSessionService.getProfessorClassSessions(userId, formattedDate),
     enabled: !!(formattedDate && userId),
+  });
+}
+
+// Nouveau hook pour récupérer les prochains cours
+export function useUpcomingCoursesQuery(userId: string, userRole: string, limit = 5) {
+  return useQuery<UpcomingCourse[]>({
+    queryKey: ["upcoming-courses", userId, userRole, limit],
+    queryFn: () => AttendanceService.getUpcomingCourses(userId, userRole, limit),
+    enabled: !!userId && !!userRole,
   });
 }

@@ -1,32 +1,18 @@
 "use client";
 
-import { AppSidebar } from "@/components/shared/navigation/app.sidebar";
-import UserDropdown from "@/components/shared/navigation/user.dropdown";
-import FeedbackDialog from "@/components/shared/others/feedback.dialog";
-import { ModeToggle } from "@/components/shared/theme/mode-toggle";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Separator } from "@/components/ui/separator";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { PageHeader } from "@/components/shared/page-header";
+import { useBreadcrumb } from "@/contexts/breadcrumb.context";
 import { useDepartmentsQuery } from "@/hooks/queries/use-departments.query";
 import { Department } from "@/types/departments.types";
 import { RiBuildingLine } from "@remixicon/react";
 import { useEffect, useState } from "react";
 import AddDepartmentDialog from "./components/add-departments.dialog";
-import { EditDepartmentDialog } from "./components/edit-departments.dialog";
-import { useBreadcrumb } from "@/contexts/breadcrumb.context";
-import { PageHeader } from "@/components/shared/page-header";
 import { DepartmentsTable } from "./components/departments.table";
+import { EditDepartmentDialog } from "./components/edit-departments.dialog";
 
 export default function DepartmentsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const { setPageTitle } = useBreadcrumb();
   const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
   const { data, isLoading, refetch } = useDepartmentsQuery(page, 10);
@@ -49,7 +35,6 @@ export default function DepartmentsPage() {
         }}
       />
       <div className="container mx-auto py-10">
-
         <DepartmentsTable
           departments={departments || []}
           isLoading={isLoading}

@@ -19,24 +19,51 @@ import {
   RiUserLine,
   RiShieldUserLine,
   RiAwardLine,
-  RiTimeLine,
+  RiTimeLine
 } from "@remixicon/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useCurrentUser } from "@/hooks/queries/use-auth.query";
+import { UserRole } from "@/types/auth.types";
+import { PiSpinnerGap } from "react-icons/pi";
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
+  const { data: currentUser, isLoading, error } = useCurrentUser();
+  
+  // Données par défaut pour l'édition
   const [profileData, setProfileData] = useState({
-    name: "Sofia Safier",
-    email: "sofia@safier.com",
-    phone: "+33 6 12 34 56 78",
-    bio: "Professeure d'informatique passionnée par l'enseignement et la technologie. Spécialisée en développement web et intelligence artificielle.",
-    location: "Paris, France",
-    department: "Informatique",
-    role: "Professeure",
-    joinDate: "Septembre 2020",
-    avatar: "https://raw.githubusercontent.com/origin-space/origin-images/refs/heads/main/exp6/user-01_l4if9t.png",
+    name: "",
+    email: "",
+    phone: "",
+    bio: "Aucune biographie disponible pour le moment.",
+    location: "Non spécifiée",
+    department: "Non spécifié",
+    role: "USER" as UserRole,
+    joinDate: "Non spécifié",
+    avatar: "",
   });
+
+  // Met à jour les données du profil quand les données utilisateur changent
+  useEffect(() => {
+    if (currentUser?.user) {
+      const user = currentUser.user;
+      setProfileData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        bio: "Aucune biographie disponible pour le moment.",
+        location: "Non spécifiée",
+        department: "Non spécifié",
+        role: user.role || ("USER" as UserRole),
+        joinDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR', { 
+          year: 'numeric', 
+          month: 'long' 
+        }) : "Non spécifié",
+        avatar: "",
+      });
+    }
+  }, [currentUser]);
 
   const handleSave = () => {
     setIsEditing(false);
@@ -45,26 +72,80 @@ export default function ProfilePage() {
 
   const handleCancel = () => {
     setIsEditing(false);
-    // Ici vous pourriez restaurer les données originales
+    // Restaurer les données originales
+    if (currentUser?.user) {
+      const user = currentUser.user;
+      setProfileData({
+        name: user.name || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        bio: "Aucune biographie disponible pour le moment.",
+        location: "Non spécifiée",
+        department: "Non spécifié",
+        role: user.role || ("USER" as UserRole),
+        joinDate: user.createdAt ? new Date(user.createdAt).toLocaleDateString('fr-FR', { 
+          year: 'numeric', 
+          month: 'long' 
+        }) : "Non spécifié",
+        avatar: "",
+      });
+    }
+  };
+
+  // Fonction pour mapper les rôles vers des libellés français
+  const getRoleLabel = (role: string) => {
+    const roleLabels: Record<string, string> = {
+      USER: "Utilisateur",
+      ADMIN: "Administrateur",
+      TEACHER: "Enseignant",
+      SUPERVISOR: "Superviseur",
+      DELEGATE: "Délégué",
+    };
+    return roleLabels[role] || role;
   };
 
   const achievements = [
-    { title: "Prix d'Excellence Pédagogique", year: "2023", type: "award" },
-    { title: "Publication de recherche", year: "2023", type: "research" },
-    { title: "Formation continue certifiée", year: "2022", type: "certification" },
+    { title: "Compte créé", year: profileData.joinDate, type: "account" },
+    { title: "Profil configuré", year: "2024", type: "setup" },
   ];
 
   const recentActivity = [
-    { action: "Cours dispensé", description: "Algorithmes et Structures de Données", time: "Il y a 2h" },
-    { action: "Évaluation créée", description: "Examen final - Base de Données", time: "Il y a 1 jour" },
-    { action: "Présence validée", description: "Cours de Programmation Web", time: "Il y a 2 jours" },
+    { action: "Connexion récente", description: "Dernière connexion au système", time: "Récemment" },
+    { action: "Profil consulté", description: "Consultation du profil utilisateur", time: "Maintenant" },
   ];
+
+  // Affichage du loading
+  if (isLoading) {
+    return (
+      <div className="flex-1 space-y-6 p-6">
+        <div className="flex items-center justify-center h-64">
+          <PiSpinnerGap className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  // Affichage d'erreur
+  if (error || !currentUser) {
+    return (
+      <div className="flex-1 space-y-6 p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-2">Erreur lors du chargement du profil</p>
+            <Button onClick={() => window.location.reload()}>Réessayer</Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 space-y-6 p-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Mon Profil</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Mon Profil {profileData.name && `- ${profileData.name}`}
+          </h1>
           <p className="text-muted-foreground">Gérez vos informations personnelles et votre profil professionnel</p>
         </div>
         <div className="flex gap-2">
@@ -231,7 +312,7 @@ export default function ProfilePage() {
                     <RiShieldUserLine className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Rôle</span>
                   </div>
-                  <Badge variant="secondary">{profileData.role}</Badge>
+                  <Badge variant="secondary">{getRoleLabel(profileData.role)}</Badge>
                 </div>
 
                 <Separator />

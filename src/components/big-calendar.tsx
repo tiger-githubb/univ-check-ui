@@ -6,6 +6,7 @@ import { ClassSession } from "@/types/attendance.types";
 
 import { EventCalendar } from "@/components/event-calendar";
 import { type CalendarEvent, type EventColor } from "@/components/types";
+import { PiSpinnerGap } from "react-icons/pi";
 
 // Etiquettes data for calendar filtering
 export const etiquettes = [
@@ -113,8 +114,8 @@ export default function BigCalendar({ classSessions = [], isLoading = false }: B
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary"></div>
-          <p className="mt-4 text-muted-foreground">Loading calendar...</p>
+          <PiSpinnerGap className="h-8 w-8 animate-spin text-primary" />
+          <p className="mt-4 text-muted-foreground">Chargement du calendrier...</p>
         </div>
       </div>
     );
